@@ -1,0 +1,10 @@
+
+>>> import devices
+>>> 
+>>> f = devices.Device('ANT001')
+>>> f
+{'id': 'ANT001'}
+>>> dir(f)
+['__cmp__', '__contains__', '__delitem__', '__doc__', '__getitem__', '__init__', '__len__', '__module__', '__repr__', '__setitem__', 'clear', 'copy', 'data', 'fromkeys', 'get', 'has_key', 'items', 'iteritems', 'iterkeys', 'itervalues', 'keys', 'pop', 'popitem', 'setdefault', 'update', 'values']
+>>> 
+

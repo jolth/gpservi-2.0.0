@@ -1,0 +1,11 @@
+Módulo desarrollado en Python que realiza Geocoding y Reverse Geocoding, con la API de Google Map.
+
+Example:
+
+>>> import geomapgoogle
+>>> # Geocode
+>>> geomapgoogle.geocode('San Francisco')
+>>> # Reverse Geocode
+>>> geomapgoogle.regeocode(latlng='40.714224,-73.961452')
+
+http://jolthgs.wordpress.com/desarrollos/geomapgoogle/

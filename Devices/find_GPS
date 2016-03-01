@@ -1,0 +1,86 @@
+##
+##
+
+Crear un Tipo de dato Diccionario:
+# Esto lo podemos hacer con direccion y puerto
+#
+>>> class TypeGPS(object):
+...     def __init__(self, **typeID):
+...             self.__dict__.update(typeID)
+...     def get(self): return self.__dict__.items()
+... 
+>>> 
+>>> 
+>>> modem = TypeGPS(id=1000, type='ANT')
+>>> modem.get()
+[('type', 'ANT'), ('id', 1000)]
+>>> dict(modem.get())
+{'type': 'ANT', 'id': 1000}
+>>> 
+>>>
+>>> getattr(modem, 'get')
+<bound method TypeGPS.get of <__main__.TypeGPS object at 0xb736ae0c>>
+>>> callable(getattr(modem, 'get'))
+True
+>>> hasattr(modem, 'get')
+True
+>>> hasattr(modem, 'gett')
+False
+>>> 
+>>> d = {'longitud':'+148560', 'latitud':'-329841'}
+>>> d.update(modem.get())
+>>> d
+{'latitud': '-329841', 'type': 'ANT', 'id': 1000, 'longitud': '+148560'}
+>>> 
+
+
+
+########################################################################################################################
+>>> data='>REV041674684322+0481126-0757378200000012;ID=ANT001<'
+>>> [ d  for d in ['ANT','SKY','HUNT'] if data.find(d) is not -1]
+['ANT']
+>>>
+>>> data=' 5     SKPypatrol_prueba $GPRMC,060909.00,A,0503.688754,N,07530.157202,W,0.0,0.0,120212,4.6,E,A*25'
+>>> [ d  for d in ['ANT','SKY','HUNT'] if data.find(d) is not -1]
+[] # Si no existe retorna NULL
+>>> [ d  for d in ['ANT','SKP','HUNT'] if data.find(d) is not -1]
+['SKP']
+>>> 
+
+# Ademas de que ya sabemos que tipo de GPS se esta comunicando con nosotros
+# retorna el nombre de la clase que manaja ese GPS. from Gps.Devices.gps import ANT, SKP, HUNT
+>>> "".join([d for d in ['ANT','SKP','HUNT'] if data.find(d) is not -1]) 
+'SKP'
+>>> 
+
+# Aunque estas clases tambien podrían llamarse AntGps/GpsAnt, GpsSkp, GpsHunt.
+>>> ("".join([d for d in ['ANT','SKP','HUNT'] if data.find(d) is not -1])).capitalize()
+'Skp'
+>>> 
+
+
+Funcionaría así:
+
+>>> # Importamos nuestro Paquete Gps
+>>> from Gps.Devices import gps
+>>> dir()
+['__builtins__', '__doc__', '__name__', '__package__', 'gps']
+>>> data='>REV041674684322+0481126-0757378200000012;ID=ANT001<'
+>>> ("".join([d for d in ['ANT','SKP','HUNT'] if data.find(d) is not -1])).capitalize()
+'Ant'
+>>> typegps = ("".join([d for d in ['ANT','SKP','HUNT'] if data.find(d) is not -1])).capitalize()
+
+# Hay que buscar la forma de depurar cuando lo que devuelva sea [] o ''
+# podria ser: if typepgs is no None: thread = getattr(gps, 'Gps' + typegps)
+#
+>>> callable(getattr(gps, 'Gps' + typegps))
+True
+>>> 
+>>> thread = getattr(gps, 'Gps' + typegps)
+>>> thread
+<class Gps.Devices.gps.GpsAnt at 0xb742e3ec>
+>>> 
+
+
+
+

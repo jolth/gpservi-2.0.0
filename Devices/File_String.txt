@@ -1,0 +1,14 @@
+
+>>> import StringIO
+
+>>> # ANTARES
+... # id
+>>> data = '>REV041674684322+0481126-0757378200000012;ID=ANT001<'
+>>> s = StringIO.StringIO(data[1:-1])
+>>> s.read()
+'REV041674684322+0481126-0757378200000012;ID=ANT001'
+>>> s.seek(-6, 2)
+>>> s.read()
+'ANT001'
+>>> 
+
