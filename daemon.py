@@ -22,7 +22,7 @@ import socket
 import threading
 from Log.logFile import createLogFile, logFile
 from Load.loadconfig import load
-import Devices.devices    
+import Devices.devices
 
 class DaemonUDP:
     """
@@ -37,13 +37,12 @@ class DaemonUDP:
         self.port = port
         self.buffering = buffering
         self.server = None # Servidor UDP activo 
-        self.running = 1 
+        self.running = 1
         self.thread = None # Hilo actual de la instacia del objeto daemon
-
 
     def start(self):
         """
-            Prepara el servidor 
+            Prepara el servidor
         """
 
         if createLogFile(str(load('FILELOG', 'FILE'))): # Creamos el fichero de Log
@@ -58,10 +57,9 @@ class DaemonUDP:
                 print >> sys.stderr, "Could not open socket:", message
                 sys.exit(1)
 
-        
     def run(self):
-        """ 
-            threading 
+        """
+            threading
         """
         # Bucle Principal
         while self.running:
@@ -74,12 +72,12 @@ class DaemonUDP:
                 fdata = '/tmp/out'
                 if os.path.exists(fdata):
                     #print >> sys.stderr, "**** SendDevice ****\n"
-                    from SendDevices import SD 
+                    from SendDevices import SD
                     SD.sendData(fdata, self.server, address, data)
 
                 self.thread = threading.Thread(target=self.threads, args=(data, address, self.__class__.lock, ))
                 self.thread.start()
-            except KeyboardInterrupt: 
+            except KeyboardInterrupt:
                 sys.stderr.write("\rExit, KeyboardInterrupt\n")
                 try:
                     sys.stdout.write("Exit App... \n")
@@ -88,10 +86,7 @@ class DaemonUDP:
                                        # activo, para terminar la ejecución del programa.
                     raise SystemExit("Se terminaron de ejecutar todos los dispositivos activos en el servidor")
                 except AttributeError, NameError: pass
-
                 break # Salimos del bucle principal
-
-
 
     def threads(self, data, address, lock):
         """
@@ -103,17 +98,14 @@ class DaemonUDP:
         print >> sys.stdout, "Data: %s|Hilo: %s" % (data, self.thread.getName())
         #print "Hilo actual: ", threading.currentThread()
         #print "Hilos presentes:",  threading.enumerate()
-        
 
         # Parse Devices
         rawData = Devices.devices.getTypeClass(data, address) # retorna la data analizada en un diccionario
-        
         if not rawData.has_key('id'): # Si la trama no tiene ID 
             print >> sys.stdout, rawData#, '\n'
             return # Termina de ejecutar el hilo
 
         #print rawData # Imprime la data procesada (Print de Prueba)
-
 
         ### Eventos
         import Event.captureEvent
@@ -132,8 +124,7 @@ class DaemonUDP:
         lock.acquire(True)
         self.__class__.endfile = logFile(str(load('FILELOG', 'FILE')),
                                          self.__class__.endfile,
-                                         raw=rawData 
-                                        )
+                                         raw=rawData)
         lock.release()
         # End Fichero de Log
 
@@ -146,8 +137,6 @@ class DaemonUDP:
         #    from SendDevices import SD 
         #    SD.sendData(fdata, self.server, address, rawData)
 
-
-
 class DaemonTCP:
     """
         Server TCP
@@ -158,19 +147,16 @@ class DaemonTCP:
         self.port = port
         self.buffering = buffering
         self.server = None
-
     def start(self):
         try:
-            self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-            self.server.bind((self.host,self.port)) 
-            self.server.listen(5) 
+            self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.server.bind((self.host,self.port))
+            self.server.listen(5)
             print ("Server run %s:%s" % (self.host, self.port))
         except socket.error, (value, message):
             if self.server:
                 self.server.close()
-            print "Could not open socket:", message 
+            print "Could not open socket:", message
             sys.exit(1)
-
-        
     def run(self):
         pass

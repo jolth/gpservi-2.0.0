@@ -19,11 +19,10 @@ class sendData:
         #print >>sys.stderr, data  
         #if self.device == self.data['id']:
         if data.find(self.device) is not -1:
-           print "#################  Device a Enviar Data:", self.device 
+           print "#################  Device a Enviar Data:", self.device
            self.send(server, address)
-            
-        
-    def send(self, server, address): 
+
+    def send(self, server, address):
         #self.server.sendto('>SXADP10103148111847<', self.address)
         with open(self.file, 'r') as f:
             f.readline()
@@ -40,7 +39,7 @@ class sendData:
                 #print >>sys.stderr, d 
                 #sent = server.sendto('\x00\x01\x04\x00 '+l.replace('\n', ''), address)
                 sent = server.sendto(d, address)
-                print >>sys.stderr, 'Sending: "%s"' % l 
+                print >>sys.stderr, 'Sending: "%s"' % l
                 #if l == 'AT$RESET' or l == 'at$reset'
 
         # Eliminamos el fichero de Envio

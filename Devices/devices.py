@@ -7,28 +7,26 @@ import StringIO
 from UserDict import UserDict
 import simplejson as json
 from Gps.Antares.convert import latWgs84ToDecimal, lngWgs84ToDecimal
-from Gps.Antares.secondsTohours import secTohr 
+from Gps.Antares.secondsTohours import secTohr
 #from Gps.Antares.gpsdate import GpsToMjd, MjdToDate 
 from Gps.SkyPatrol.convert import degTodms, skpDate, skpTime, fechaHoraSkp
 from Gps.common import MphToKph, NodeToKph
-from Gps.common import ignitionState, ignitionStatett8750  
+from Gps.common import ignitionState, ignitionStatett8750
 import Location.geomapgoogle
 import Location.geocoding
-
+import Location.nominatim
 
 def tagData(dFile, position, bit=None, seek=0):
     """
-        Toma un punto de partida (position), cantidad de bit y un punto de 
+        Toma un punto de partida (position), cantidad de bit y un punto de
         referencia para leer los bit(según el método seek() de los fichero).
         Además dataFile el cual es objeto StringIO.
     """
     try:
         dFile.seek(position, seek)
-        tagdata =  dFile.read(bit)
+        tagdata = dFile.read(bit)
     except: sys.stderr.write("Error al obtener el Tag Data")
-            
     return tagdata
-
 
 # Clase que actua como un diccionario
 class Device(UserDict):
@@ -43,7 +41,6 @@ class Device(UserDict):
         # se comenta self['datetime'] para realizar 
         # el time zone en las Skypatrol
         #self["datetime"] = datetime.datetime.now()
-
 
 class ANTDevice(Device):
     """
@@ -85,7 +82,7 @@ class ANTDevice(Device):
             # Date/Datetime
             #mjd = GpsToMjd(int(self['weeks']), int(self['secondsDay']))
             #date = MjdToDate(mjd, 1980, 1, 6)
-            
+
             #self['date'] = MjdToDate(mjd, 1980, 1, 6)
             #self['date'] = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
             #self["datetime"] = None 
@@ -94,14 +91,13 @@ class ANTDevice(Device):
             #self["date"] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
             #self["datetime"] = fechaHoraSkp(self["date"], self["time"]) 
             self["datetime"] = datetime.datetime.fromtimestamp((315964800000 + ((int(self['weeks'])* 7 + int(self['dayWeek'])) * 24 * 60 * 60 + int(self['secondsDay'])) * 1000) // 1000) 
-            
+
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
-            self["geocoding"] = None 
+            self["geocoding"] = None
             #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
-            self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"]))
-            #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
-
+            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # deja de funcionar 16-09-2015
+            self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
         except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         finally: dataFile.close()
 
@@ -110,24 +106,23 @@ class ANTDevice(Device):
         if key == "data" and item:
             self.__parse(item)
         # Llamamos a __setitem__ de nuestro ancestro
-        Device.__setitem__(self, key, item) 
+        Device.__setitem__(self, key, item)
 
-        
 def tagDataskp(dList, start, end, name):
     """
         Toma una posición para obtener de la lista dList.
     """
     try:
         #if end is not None: 
-        if end: 
+        if end:
             #tagdata = ",".join(dList[start:end + 1])
             tagdata = dList[start:end + 1]
         else:
             tagdata = dList[start]
-    except: sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s.\n" % (name, dList[3], dList[2])) # dList[2] el 'id'
-            
+    except:
+        from datetime import datetime
+        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now()))) # dList[2] el 'id'
     return tagdata or None
-    
 
 class SKPDevice(Device):
     """
@@ -136,8 +131,11 @@ class SKPDevice(Device):
     # ['', '5', 'SKP87', '$GPRMC', '122408.00', 'A', '0441.935953', 'N', '07404.450302', 'W', '0.0', '0.0', '180912', '5.5', 'E', 'A*2F']
     # ['', '5', 'SKP002', 'GPRMC', '225235.00', 'A', '0502.87758', 'N', '07530.30432', 'W', '0.000', '0.0', '191012', 'A*42']
     # ['', '6', 'SKP001', '459', 'GPRMC', '155120.00', 'A', '0502.87300', 'N', '07530.33326', 'W', '0.000', '0.0', '031212', 'A*40']
+    #
     # dataList:  ['', '\x00\x04\x02\x10\x00', '5', 'SKP003', '221', 'GPRMC', '210530.00', 'A', '0556.25966', 'N', '07448.89314', 'W', '0.000', '0.0', '201212', 'D*4E']
-    tagDataSKP = {  # (position_start, position_end, function_tagData, nameTag, function_convert )
+    #            [ 0,                      1,   2,        3,     4,       5,           6,   7,            8,   9,            10,  11,     12,     13,       14,    15 ]
+    tagDataSKP = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
                     "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
                     "type"      : (0, None, tagDataskp, 'type', None),
                     "typeEvent" : (5, None, tagDataskp, 'typeEvent', None), # 
@@ -158,7 +156,6 @@ class SKPDevice(Device):
                     "date"  : (14, None, tagDataskp, 'date', skpDate), # Fecha 
                     "odometro"  : (15, None, tagDataskp, 'odometro', None) # Odómetro
                  }
-
 
     def __parse(self, data):
         self.clear()
@@ -192,30 +189,30 @@ class SKPDevice(Device):
 
             # Fecha y Hora del dispositivo:
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
-            self["datetime"] = fechaHoraSkp(self["date"], self["time"]) 
+            self["datetime"] = fechaHoraSkp(self["date"], self["time"])
 
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
-            self["geocoding"] = None 
+            self["geocoding"] = None
             #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
-            self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"]))
-            #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
-
-
+            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # Dejo de funcionar el 16-09-2015
+            #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"])) # Dejo de funcionar el 17-09-2015
+            # Nominatim:
+            #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
+            self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
         except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
-
 
     def __setitem__(self, key, item):
         if key == "data" and item:
             self.__parse(item)
         # Llamamos a __setitem__ de nuestro ancestro
-        Device.__setitem__(self, key, item) 
+        Device.__setitem__(self, key, item)
 
 
 class TTDevice(Device):
     """
-        Dispositivo Skypatrol TT8750
+        Dispositivo Skypatrol TT8750 & ENFORA
     """
     # ['', '\x00\x04\x02\x00', '6', 'SKP001', 'D1', 'DD', '$GPRMC', '205206.00', 'V', '0502.913500', 'N', '07530.315135', 'W', '0.0', '0.0', '201212', '4.6', 'E', 'N*34\x00'] 
     # ['', '\x00\x04\x02\x00', '1', 'TT1', 'D1', '5E', '$GPRMC', '222202.00', 'A', '0502.874786', 'N', '07530.318359', 'W', '0.0', '0.0', '201212', '4.6', 'E', 'A*24\x00'] 
@@ -240,7 +237,6 @@ class TTDevice(Device):
                     "date"  : (15, None, tagDataskp, 'date', skpDate), # Fecha 
                     "odometro"  : (16, None, tagDataskp, 'odometro', None) # Odómetro
                  }
-
 
     def __parse(self, data):
         self.clear()
@@ -274,16 +270,15 @@ class TTDevice(Device):
 
             # Fecha y Hora del dispositivo:
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
-            self["datetime"] = fechaHoraSkp(self["date"], self["time"]) 
+            self["datetime"] = fechaHoraSkp(self["date"], self["time"])
             #self["datetime"] = datetime.datetime.now()
 
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
-            self["geocoding"] = None 
+            self["geocoding"] = None
             #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
-            self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"]))
-            #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
-
+            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # Deja de funcionar 16-09-2015
+            self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
 
         except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
@@ -293,7 +288,7 @@ class TTDevice(Device):
         if key == "data" and item:
             self.__parse(item)
         # Llamamos a __setitem__ de nuestro ancestro
-        Device.__setitem__(self, key, item) 
+        Device.__setitem__(self, key, item)
 
 
 class HUNTDevice(Device):
@@ -301,7 +296,6 @@ class HUNTDevice(Device):
         Dispositivo Hunter
     """
     pass
-
 
 
 def typeDevice(data):
@@ -329,11 +323,10 @@ def typeDevice(data):
     types = ('ANT', 'SKP', 'TT')
 
     typeDev = lambda dat: ("".join(
-                            [d for d in types 
+                            [d for d in types
                             if dat.find(d) is not -1])
                         )
     return typeDev(data) or None #raise
-
 
 #
 def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
@@ -341,9 +334,9 @@ def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
         Determina que clase debe manejar un determinado dispositivo y
         retorna un diccionario con la trama procesada.
 
-        Recibe la data enviada por el dispositivo (data), y opcionalmente 
-        el nombre del módulo donde se encuentra la clase que manipula este 
-        tipo de dispositivo (module). La clase manejador debe tener un 
+        Recibe la data enviada por el dispositivo (data), y opcionalmente
+        el nombre del módulo donde se encuentra la clase que manipula este
+        tipo de dispositivo (module). La clase manejador debe tener un
         formato compuesto por 'TIPO_DISPOSITIVO + Device' por ejemplo: ANTDevice,
         SKPDevice, etc.
 
@@ -386,9 +379,9 @@ def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
     #print "-"*80
 
     #return dev
-    def getClass(module, dev): 
-        """ 
-            Retorna una referencia a la clase manejadora. 
+    def getClass(module, dev):
+        """
+            Retorna una referencia a la clase manejadora.
             Usage:
             >>> getClass(module, 'ANTDevice')
             <class devices.ANTDevice at 0xb740435c>
@@ -401,6 +394,4 @@ def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
         return hasattr(module, dev) and getattr(module, dev) or Device
 
     return getClass(module, dev)(data, address)
-
-     
 

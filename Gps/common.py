@@ -10,7 +10,7 @@ def MphToKph(speed):
 def NodeToKph(speed):
     import math
     return math.floor(float(speed) * 1.852)
-  
+
 def ignitionState(state):
     state = int(state)
     #print "**"*34

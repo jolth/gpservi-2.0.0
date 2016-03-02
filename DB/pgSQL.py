@@ -9,16 +9,13 @@ import sys
 import traceback
 import psycopg2 as pgsql
 
-
-
-def connection(args=None): 
-    """ 
-        args, puede ser una cadena con todos los datos para conectarse a la base de datos o 
-        simplemente enviarse sin datos, para lo cual tomara la configuración por defecto 
+def connection(args=None):
+    """
+        args, puede ser una cadena con todos los datos para conectarse a la base de datos o
+        simplemente enviarse sin datos, para lo cual tomara la configuración por defecto
         almacenada en el fichero de configuración "config.cfg" (en la sección [DATABASE]).
         así:
 
-        
         Usage:
         >>> from DB.pgSQL import connection
 
@@ -35,16 +32,12 @@ def connection(args=None):
     """
     if args is None:
         from Load.loadconfig import load
-
         args = {}
-        
         args['dbname'] = load('DATABASE', 'DBNAME')
         args['user'] = load('DATABASE', 'USER')
         args['host'] = load('DATABASE', 'HOST')
         args['password'] = load('DATABASE', 'PASSWORD')
-
         args = " ".join(["%s=\'%s\'" % (k, v) for k, v in args.items()])
-
     # Conexión a la base de datos: 
     try:
         conn = pgsql.connect(args)
@@ -53,16 +46,14 @@ def connection(args=None):
         print >> sys.stderr, e
         print >> sys.stdout, 'Error: Revisar el archivo de error.log'
         sys.exit(1)
-
     # Retornamos la conexión
     return conn
 
-        
 class PgSQL(object):
-    """ 
+    """
         Crea un obejto conexión para la base de datos especificada.
 
-        Recibe los mismos datos que la función connection(args=None). Por lo tanto, si se quiere usar la 
+        Recibe los mismos datos que la función connection(args=None). Por lo tanto, si se quiere usar la
         conexión a la base de datos por defecto se debe llamar a PgSQL() sin argumentos, asi:
         >>> conn = pgSQL.PgSQL()
 
@@ -87,23 +78,19 @@ class PgSQL(object):
 
     """
     def __init__(self, args=None):
-        if args is not None: self.conn = connection(args)  
-        else: self.conn = connection()  
-              
+        if args is not None: self.conn = connection(args)
+        else: self.conn = connection()
         self.status = self.conn.status # Status
         self.procpid = self.conn.get_backend_pid() # Get backend process id.
-
         self.cur = self.conn.cursor() # Return a new cursor.
-
         #print "procpid:", self.procpid#(Print de Prueba) # process id (Print de Prueba)
-
 
     def exe(self, query, data=None):
         """
             query, debe ser una cadena que contenga la Query SQL, así:
             "SELECT * FROM gps"
 
-            data, debe ser una tupla o diccionario que cotenga los datos a 
+            data, debe ser una tupla o diccionario que cotenga los datos a
             pasar a la Query, así:
             "INSERT INTO test (num, data) VALUES (%s, %s)", (42, 'bar')
 
@@ -143,7 +130,6 @@ class PgSQL(object):
             >>>
         """
         record = None
-
         if data is not None:
             try:
                 self.cur.execute(query, data)
@@ -153,18 +139,17 @@ class PgSQL(object):
                 print >> sys.stderr, traceback.format_exc(exc_type)
                 #return self.conn.status
                 return self.conn.get_transaction_status() # Deberia retornar 0, si el insert no se realizo 
-            finally: 
+            finally:
                 print >> sys.stderr, "Actualizando y Cerranda la conexión"
                 # Realizamos los cambios en la DB
                 self.conn.commit()
                 # Cerramos la comunicación
                 self.cur.close()
                 self.conn.close()
-                
         else:
             try:
                 self.cur.execute(query) # Execute the Query
-                record = self.cur.fetchall() or record 
+                record = self.cur.fetchall() or record
                 return record  # Retornamo una lista con los resultados 
                                # de la consulta o None si no obtine nada
             except:
@@ -181,10 +166,5 @@ class PgSQL(object):
                 self.cur.close()
                 self.conn.close()
 
-
-                
-
     def exemany(self): pass
-
-
 

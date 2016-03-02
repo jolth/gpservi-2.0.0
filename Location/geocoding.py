@@ -4,7 +4,7 @@
 """
     Geocoding API Google/OSM
 
-    Usage: 
+    Usage:
         >>> import geocoding
         >>>
         >>> geocoding.geocodeGMap('Manizales')
@@ -38,7 +38,7 @@ def geocodeGMap(address, sensor='false', **geo_args):
 
 def regeocodeGMapOLD(latlng, sensor='false', **geo_args):
     """
-        Google Map Reverse Geocoding 
+        Google Map Reverse Geocoding
         URL: http://maps.google.com/maps/geo?q=5.06889,-75.51738&output=json&sensor=false
     """
     geo_args = ({
@@ -52,15 +52,14 @@ def regeocodeGMapOLD(latlng, sensor='false', **geo_args):
     #print url
     result = json.load(urllib.urlopen(url))
 
-    return json.dumps([s['address'] 
+    return json.dumps([s['address']
                for s in result['Placemark']])
 
 
 def regeocodeGMap(latlng, level=None, sensor='false', **geo_args):
     """
         Google Map Reverse Geocoding
-            
-            Por defecto level se pone a 0. Lo cual nos muestra la 
+            Por defecto level se pone a 0. Lo cual nos muestra la
             ubicación con el maximo detalle.
 
         Usage:
@@ -82,7 +81,7 @@ def regeocodeGMap(latlng, level=None, sensor='false', **geo_args):
     url = GEOCODE_BASE_URL + '?' + urllib.unquote(urllib.urlencode(geo_args))
     #print url
     result = json.load(urllib.urlopen(url))
-    return level and json.loads(json.dumps([s['formatted_address'] 
+    return level and json.loads(json.dumps([s['formatted_address']
            for s in result['results']]))[level] or json.loads(json.dumps([s['formatted_address']
                for s in result['results']]))[0]
 

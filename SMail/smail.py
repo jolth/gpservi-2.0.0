@@ -10,7 +10,8 @@ from email.mime.text import MIMEText
 #sender = 'rastree@devmicrosystem.com'
 #sender = 'www-data@rastree.com'
 
-def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='www-data@rastree.com', hostname='localhost'):
+#def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='www-data@rastree.com', hostname='localhost'):
+def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='mailer-daemon@rastree.com', hostname='localhost'):
     """
         Usage:
             >>> import smail
@@ -22,8 +23,6 @@ def sendMail(receivers, subject='Simple test message', text='This is body of the
             >>> smail.sendMail(receivers, subject, text, sender)
             >>> 
     """
-    ##
-
     ## Create the message
     msg = MIMEText(text)
     r = [(k, v) for k, v in receivers.iteritems()]
@@ -34,7 +33,6 @@ def sendMail(receivers, subject='Simple test message', text='This is body of the
     msg['Subject'] = subject
     # Receivers
     r = [v for v in receivers.values()]
-
     # Server
     server = smtplib.SMTP(hostname)
     server.set_debuglevel(True) # show communication with the server

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from pytz import timezone
 
-def deg_to_dms(num, signo):       
+def deg_to_dms(num, signo):
     """
     """
     point = num.find('.')
@@ -13,8 +13,7 @@ def deg_to_dms(num, signo):
         return numero * (-1)
     return numero
 
-
-def degTodms(s):       
+def degTodms(s):
     """
     """
     #s = s.split(',')
@@ -28,7 +27,6 @@ def degTodms(s):
     if signo in ['S','W']:
         return numero * (-1)
     return numero
-
 
 def skpDate(date):
     """
@@ -52,11 +50,11 @@ def skpTime(time):
         >>> 
     """
     import datetime
-    return datetime.time(int(time[0:2]), int(time[2:4]), int(time[4:6]), int(time[-2]), tzinfo=timezone('UTC')) 
+    return datetime.time(int(time[0:2]), int(time[2:4]), int(time[4:6]), int(time[-2]), tzinfo=timezone('UTC'))
 
 def fechaHoraSkp(date, time):
     """
-        Crea un datetime para la fecha y la hora en que la unidad 
+        Crea un datetime para la fecha y la hora en que la unidad
         genero la trama.
 
         >>> from datetime import datetime

@@ -34,21 +34,19 @@ import sys
 import traceback
 
 
-def insertEvent(evento): 
+def insertEvent(evento):
     def insert(data):
-        """ 
-            Llama la función PL/pgSQL. 
+        """
+            Llama la función PL/pgSQL.
         """
         from DB.pgSQL import PgSQL
-            
         #print "\nINSERT:", evento.__name__#(Print de Prueba)
-        
         ###### SQL:
         # Insert Positions:
-        queryPositions = """SELECT fn_save_event_position_gps(%(id)s, %(position)s, %(geocoding)s, 
+        queryPositions = """SELECT fn_save_event_position_gps(%(id)s, %(position)s, %(geocoding)s,
                          %(speed)s, %(altura)s, %(course)s, %(gpsSource)s, %(address)s, %(datetime)s);"""
         # Insert Eventos:
-        queryEventos = """INSERT INTO eventos(gps_id, positions_gps_id, type, fecha) 
+        queryEventos = """INSERT INTO eventos(gps_id, positions_gps_id, type, fecha)
                           VALUES (%(gps_id)s, %(positions_id)s, %(codEvent)s, %(datetime)s);"""
 
         try:
@@ -64,7 +62,6 @@ def insertEvent(evento):
             except:
                 #print "Se termina de Gestionar el Evento", evento.__name__#(Print de Prueba)
                 return # Se termina la ejecución. 
-                
             #print "RETURN:", data['positions_id'], data['gps_id'] #(Print de Prueba)# print de prueba 
             # Esto para que no guarde el event5 en la tabla eventos:
             if evento.__name__ == "event5": return evento(data) # Terminamos la ejecucion Llamando a event5
@@ -88,16 +85,12 @@ def insertEvent(evento):
             # Cerramos la comunicación
             db.cur.close()
             db.conn.close()
-
-
-        return evento(data) 
-
+        return evento(data)
     return insert
 
 
 def insertReport(): pass
 
-        
 # Funciones Manejadoras de Eventos:
 @insertEvent
 def event1(data=None):
@@ -157,8 +150,8 @@ def event1(data=None):
             msg += u"""
             Vehiculo: %s
             Cliente: %s
-            %s: %s 
-            """ % (veh, nom, tipo, tel) 
+            %s: %s
+            """ % (veh, nom, tipo, tel)
         msg += u"""
         Fecha: %s
         """ % (data['datetime'].strftime("%F %H:%M:%S"))
@@ -167,14 +160,14 @@ def event1(data=None):
 
         <http://maps.google.com/maps?q=%(lat)s,%(lng)s>
 
-        """ % data 
+        """ % data
 
         #import SMail
         from SMail import smail
         # sender
         #sender = 'rastree@devmicrosystem.com'
         # receptores del mensaje
-        receivers = {'Soporte':'soporte@devmicrosystem.com', 'Diana Duque':'diana.duque@devmicrosystem.com'}
+        receivers = {'Soporte':'soporte@devmicrosystem.com', 'Diana Duque':'diana.duque@devmicrosystem.com', 'Demouser':'demouser@rastree.com'}
         #print "MENSAJE:", msg
         subject = u"Mensaje de Panicon(%s) Vehículo %s" % (data['id'], veh)
         #print "SUBJECT", subject
@@ -201,10 +194,9 @@ def event1(data=None):
 @insertEvent
 def event2(data=None): return "Speeding"
 @insertEvent
-def event5(data=None): 
+def event5(data=None):
     #queryIgnition = """INSERT INTO vehicle_state()"""
     queryIgnition = """SELECT fn_insert_ingnition_state(%(gps_id)s,  %(ignition)s, NULL, NULL, NULL, %(datetime)s);"""
-
     try:
         from DB.pgSQL import PgSQL
         db = PgSQL()
@@ -225,15 +217,13 @@ def event5(data=None):
         # Cerramos la comunicación
         db.cur.close()
         db.conn.close()
-
-    return "Report" 
+    return "Report"
 
 @insertEvent
-def event6(data=None): 
+def event6(data=None):
     # Insert vehicle_state:
     #queryVehiState = """SELECT fn_ingresar_vehicle_state(%(gps_id)s,  't', NULL, NULL, NULL);"""
     queryVehiState = """SELECT fn_ingresar_vehicle_state(%(gps_id)s,  't', NULL, NULL, NULL, %(datetime)s);"""
-
     try:
         from DB.pgSQL import PgSQL
         db = PgSQL()
@@ -254,15 +244,13 @@ def event6(data=None):
         # Cerramos la comunicación
         db.cur.close()
         db.conn.close()
-        
     return "Start"
 
 @insertEvent
-def event7(data=None): 
+def event7(data=None):
     # Insert vehicle_state:
     #queryVehiState = """SELECT fn_ingresar_vehicle_state(%(gps_id)s,  'f', NULL, NULL, NULL);"""
     queryVehiState = """SELECT fn_ingresar_vehicle_state(%(gps_id)s,  'f', NULL, NULL, NULL, %(datetime)s);"""
-
     try:
         from DB.pgSQL import PgSQL
         db = PgSQL()
@@ -291,11 +279,10 @@ def event8(data=None): return "Bateri on"
 @insertEvent
 def event9(data=None): return "Bateri off"
 
-                       
-def parseEvent(data=None): 
+def parseEvent(data=None):
     """
-        Analiza y determina que hacer con cada uno de los eventos. 
-        
+        Analiza y determina que hacer con cada uno de los eventos.
+
         Llama a getTypeEvent
     """
     # Si es llamable, se llama a la función manajadora. si no, se retorna None 
@@ -305,7 +292,7 @@ def parseEvent(data=None):
 
 
 def getTypeEvent(data=None, module=sys.modules[parseEvent.__module__]):
-    """ 
+    """
         >>> import captureEvent
         >>> import datetime
         >>>data = {'codEvent': '05', 'weeks': '1693', 'dayWeek': '4', 'ageData': '2', \
@@ -331,6 +318,6 @@ def getTypeEvent(data=None, module=sys.modules[parseEvent.__module__]):
         return # None
 
     # Retorna la función Manejadora:
-    return hasattr(module, event) and getattr(module, event) or None 
+    return hasattr(module, event) and getattr(module, event) or None
 
 

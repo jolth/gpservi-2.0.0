@@ -3,9 +3,9 @@ Geocoding API Google
 
  import geomapgoogle
  geomapgoogle.geocode('San Francisco')
- 
+
  geomapgoogle.regeocode(latlng='40.714224,-73.961452')
- 
+
 """
 import urllib, json
 
@@ -44,7 +44,7 @@ def regeocodeOLD(latlng, sensor='false', **geo_args):
     #print url
     result = json.load(urllib.urlopen(url))
 
-    return json.dumps([s['address'] 
+    return json.dumps([s['address']
                for s in result['Placemark']])
 
 
@@ -61,7 +61,7 @@ def regeocode(latlng, sensor='false', **geo_args):
     url = GEOCODE_BASE_URL + '?' + urllib.unquote(urllib.urlencode(geo_args))
     #print url
     result = json.load(urllib.urlopen(url))
-    return json.dumps([s['formatted_address'] 
+    return json.dumps([s['formatted_address']
            for s in result['results']])
 
 

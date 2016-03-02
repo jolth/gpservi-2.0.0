@@ -33,7 +33,6 @@ def DateToMjd(year, month, day):
         + 1721028 \
         - 2400000
 
-
 # Convert Modified Julian Day to calendar date.
 # - Assumes Gregorian calendar.
 # - Adapted from Fliegel/van Flandern ACM 11/#10 p 657 Oct 1968.
@@ -59,8 +58,6 @@ def MjdToDate(mjd, year, month, day):
     year = 100 * (C - 49) + Y + J;
     return (year, month, day)
 
-
-
 # Convert GPS Week and Seconds to Modified Julian Day.
 # Ignores UTC leap seconds.
 #def GpsToMjd(GpsCycle, GpsWeek, GpsSeconds) 
@@ -76,7 +73,3 @@ def GpsToMjd(gpsWeek, gpsSeconds):
     gpsDays = ((gpsCycle * 1024) + gpsWeek) * 7 + (gpsSeconds / 86400);
     return DateToMjd(1980, 1, 6) + gpsDays;
     #return DateToMjd(1980, 1, 8) + gpsDays; # Trampa
-
-
-
-

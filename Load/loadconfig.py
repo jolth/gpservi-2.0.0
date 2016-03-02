@@ -1,10 +1,10 @@
 """
   Module that loads the configuration file
-  
+
   Author: Jorge A. Toro
   Date: 02-02-2012
-  
-  Usage: 
+
+  Usage:
     from Load.loadconfig import load
     load('MODULES', 'GpsIP')
     load('DAEMON', 'DAEMONHost')
@@ -36,4 +36,3 @@ def load(section, option, archive=_ConfigFile):
     sys.stderr.write("Incorrect value for %s or %s parameter\n" % \
     (section, option))
     return
-

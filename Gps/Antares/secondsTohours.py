@@ -29,5 +29,4 @@ def secTohr(sec):
     sec = sec % 60
 
     #return "%d:%d:%d" % (h, m, sec) 
-    return datetime.time(h, m, sec, tzinfo=timezone('UTC')) 
-
+    return datetime.time(h, m, sec, tzinfo=timezone('UTC'))
