@@ -161,7 +161,6 @@ class SKPDevice(Device):
         self.clear()
         try:
             import re
-
             #data = data.replace('\x00\x04\x02\x10\x00',',')
             #print "data0:", data #(Print de Prueba)
             ####
