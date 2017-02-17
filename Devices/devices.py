@@ -9,6 +9,7 @@ import simplejson as json
 from Gps.Antares.convert import latWgs84ToDecimal, lngWgs84ToDecimal
 from Gps.Antares.secondsTohours import secTohr
 from Gps.SkyPatrol.convert import degTodms, skpDate, skpTime, fechaHoraSkp
+from Gps.SkyPatrol.convert import mTokm
 from Gps.common import MphToKph, NodeToKph
 from Gps.common import ignitionState, ignitionStatett8750
 import Location.geomapgoogle
@@ -35,6 +36,21 @@ class Device(UserDict):
         UserDict.__init__(self)
         self["data"] = deviceData
         self["address"] = "%s,%s" % address
+
+
+def tagDataskp(dList, start, end, name):
+    """
+        Toma una posición para obtener de la lista dList.
+    """
+    try:
+        if end:
+            tagdata = dList[start:end + 1]
+        else:
+            tagdata = dList[start]
+    except:
+        from datetime import datetime
+        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now())))
+    return tagdata or None
 
 
 class ANTDevice(Device):
@@ -87,21 +103,6 @@ class ANTDevice(Device):
         Device.__setitem__(self, key, item)
 
 
-def tagDataskp(dList, start, end, name):
-    """
-        Toma una posición para obtener de la lista dList.
-    """
-    try:
-        if end:
-            tagdata = dList[start:end + 1]
-        else:
-            tagdata = dList[start]
-    except:
-        from datetime import datetime
-        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now())))
-    return tagdata or None
-
-
 class SKPDevice(Device):
     """
         Dispositivo Skypatrol
@@ -132,7 +133,7 @@ class SKPDevice(Device):
                     "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
                     "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
                     "date"  : (14, None, tagDataskp, 'date', skpDate), # Fecha 
-                    "odometro"  : (15, None, tagDataskp, 'odometro', None) # Odómetro
+                    "odometro"  : (15, None, tagDataskp, 'odometro', mTokm) # Odómetro
                  }
 
     def __parse(self, data):
@@ -305,7 +306,7 @@ def typeDevice(data):
                         )
     return typeDev(data) or None #raise
 
-#
+
 def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
     """
         Determina que clase debe manejar un determinado dispositivo y
