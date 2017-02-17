@@ -8,7 +8,6 @@ from UserDict import UserDict
 import simplejson as json
 from Gps.Antares.convert import latWgs84ToDecimal, lngWgs84ToDecimal
 from Gps.Antares.secondsTohours import secTohr
-#from Gps.Antares.gpsdate import GpsToMjd, MjdToDate 
 from Gps.SkyPatrol.convert import degTodms, skpDate, skpTime, fechaHoraSkp
 from Gps.common import MphToKph, NodeToKph
 from Gps.common import ignitionState, ignitionStatett8750
@@ -28,19 +27,12 @@ def tagData(dFile, position, bit=None, seek=0):
     except: sys.stderr.write("Error al obtener el Tag Data")
     return tagdata
 
-# Clase que actua como un diccionario
 class Device(UserDict):
     """ Store Device"""
     def __init__(self, deviceData=None, address=None):
         UserDict.__init__(self)
         self["data"] = deviceData
-        #self["address"] = address
         self["address"] = "%s,%s" % address
-        #self["geocoding"] = None
-        # Fecha y hora (del sistema)
-        # se comenta self['datetime'] para realizar 
-        # el time zone en las Skypatrol
-        #self["datetime"] = datetime.datetime.now()
 
 class ANTDevice(Device):
     """
@@ -70,23 +62,18 @@ class ANTDevice(Device):
         self.clear()
         try:
             dataFile = StringIO.StringIO(data[1:-1]) # remove '<' y '>'
-            #
             for tag, (position, bit, seek, parseFunc, convertFunc) in self.tagDataANT.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataFile, position, bit, seek)) or parseFunc(dataFile, position, bit, seek)
-
             # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
             self['altura'] = None
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
-
             # Date/Datetime
             #mjd = GpsToMjd(int(self['weeks']), int(self['secondsDay']))
             #date = MjdToDate(mjd, 1980, 1, 6)
-
             #self['date'] = MjdToDate(mjd, 1980, 1, 6)
             #self['date'] = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
             #self["datetime"] = None 
-
             #date = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
             #self["date"] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
             #self["datetime"] = fechaHoraSkp(self["date"], self["time"]) 
