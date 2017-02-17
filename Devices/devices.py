@@ -15,6 +15,7 @@ import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
 
+
 def tagData(dFile, position, bit=None, seek=0):
     """
         Toma un punto de partida (position), cantidad de bit y un punto de
@@ -27,12 +28,14 @@ def tagData(dFile, position, bit=None, seek=0):
     except: sys.stderr.write("Error al obtener el Tag Data")
     return tagdata
 
+
 class Device(UserDict):
     """ Store Device"""
     def __init__(self, deviceData=None, address=None):
         UserDict.__init__(self)
         self["data"] = deviceData
         self["address"] = "%s,%s" % address
+
 
 class ANTDevice(Device):
     """
@@ -64,28 +67,16 @@ class ANTDevice(Device):
             dataFile = StringIO.StringIO(data[1:-1]) # remove '<' y '>'
             for tag, (position, bit, seek, parseFunc, convertFunc) in self.tagDataANT.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataFile, position, bit, seek)) or parseFunc(dataFile, position, bit, seek)
-            # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
+            
             self['altura'] = None
-            # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
-            # Date/Datetime
-            #mjd = GpsToMjd(int(self['weeks']), int(self['secondsDay']))
-            #date = MjdToDate(mjd, 1980, 1, 6)
-            #self['date'] = MjdToDate(mjd, 1980, 1, 6)
-            #self['date'] = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
-            #self["datetime"] = None 
-            #date = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
-            #self["date"] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
-            #self["datetime"] = fechaHoraSkp(self["date"], self["time"]) 
-            self["datetime"] = datetime.datetime.fromtimestamp((315964800000 + ((int(self['weeks'])* 7 + int(self['dayWeek'])) * 24 * 60 * 60 + int(self['secondsDay'])) * 1000) // 1000) 
-
-            # Realizamos la Geocodificación. Tratar de no hacer esto
-            # es mejor que se realize por cada cliente con la API de GoogleMap
+            self["datetime"] = datetime.datetime.fromtimestamp((315964800000 +
+                ((int(self['weeks']) * 7 + int(self['dayWeek'])) * 24 * 60 * 60 +
+                    int(self['secondsDay'])) * 1000) // 1000) 
+            
             self["geocoding"] = None
-            #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
-            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # deja de funcionar 16-09-2015
             self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
-        except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+        except Exception: print(sys.exc_info()) 
         finally: dataFile.close()
 
 
@@ -95,21 +86,21 @@ class ANTDevice(Device):
         # Llamamos a __setitem__ de nuestro ancestro
         Device.__setitem__(self, key, item)
 
+
 def tagDataskp(dList, start, end, name):
     """
         Toma una posición para obtener de la lista dList.
     """
     try:
-        #if end is not None: 
         if end:
-            #tagdata = ",".join(dList[start:end + 1])
             tagdata = dList[start:end + 1]
         else:
             tagdata = dList[start]
     except:
         from datetime import datetime
-        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now()))) # dList[2] el 'id'
+        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now())))
     return tagdata or None
+
 
 class SKPDevice(Device):
     """
