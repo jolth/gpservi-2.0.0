@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import division
 from pytz import timezone
 
 def deg_to_dms(num, signo):
@@ -85,4 +86,4 @@ def fechaHoraSkp(date, time):
 
 
 def mTokm(meters):
-    return "{:,}".format(meters / 1000)
+    return "{:,} km".format(meters / 1000)
