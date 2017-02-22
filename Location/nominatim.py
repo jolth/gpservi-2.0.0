@@ -27,6 +27,7 @@ import urllib
 import urllib2
 import json
 import re
+from Load.loadconfig import load
 
 
 class Reverse_Geocoding(object):
@@ -64,7 +65,9 @@ class Openstreetmap(Reverse_Geocoding):
     def __init__(self, lat, lon, uri=None, **options):
         if uri is None:
             #uri = 'http://nominatim.openstreetmap.org/reverse?'
-            uri = 'http://127.0.0.1:8181/nominatim/reverse.php?'
+            #uri = 'http://127.0.0.1:8181/nominatim/reverse.php?'
+            uri = load('MAPS', 'uri_nominatim')
+
             Reverse_Geocoding.__init__(self, lat, lon, uri, **options)
         else:
             Reverse_Geocoding.__init__(self, lat, lon, uri, **options)
