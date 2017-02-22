@@ -178,7 +178,7 @@ class SKPDevice(Device):
             #['7', 'SKP002', 'GPRMC', '224431.00', 'A', '0502.87359', 'N', '07530.30060', 'W', '0.000', '0.0', '191012', 'A*47']
             #
             dataList.insert(0, '')
-            #print "dataList: ", dataList #(Print de Prueba)
+            print "dataList: ", dataList #(Print de Prueba)
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataSKP.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
 

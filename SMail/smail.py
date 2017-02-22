@@ -11,7 +11,8 @@ from email.mime.text import MIMEText
 #sender = 'www-data@rastree.com'
 
 #def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='www-data@rastree.com', hostname='localhost'):
-def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='mailer-daemon@rastree.com', hostname='localhost'):
+#def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='mailer-daemon@rastree.com', hostname='localhost'):
+def sendMail(receivers, subject='Simple test message', text='This is body of the message.', sender='rastree@rastree.com', hostname='localhost'):
     """
         Usage:
             >>> import smail

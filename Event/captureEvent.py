@@ -167,7 +167,8 @@ def event1(data=None):
         # sender
         #sender = 'rastree@devmicrosystem.com'
         # receptores del mensaje
-        receivers = {'Soporte':'soporte@devmicrosystem.com', 'Diana Duque':'diana.duque@devmicrosystem.com', 'Demouser':'demouser@rastree.com'}
+        #receivers = {'Soporte':'soporte@devmicrosystem.com', 'Diana Duque':'diana.duque@devmicrosystem.com', 'Demouser':'demouser@rastree.com'}
+        receivers = {'Eventos': 'eventos'}
         #print "MENSAJE:", msg
         subject = u"Mensaje de Panicon(%s) Vehículo %s" % (data['id'], veh)
         #print "SUBJECT", subject
