@@ -133,8 +133,8 @@ class SKPDevice(Device):
     # ['', '5', 'SKP002', 'GPRMC', '225235.00', 'A', '0502.87758', 'N', '07530.30432', 'W', '0.000', '0.0', '191012', 'A*42']
     # ['', '6', 'SKP001', '459', 'GPRMC', '155120.00', 'A', '0502.87300', 'N', '07530.33326', 'W', '0.000', '0.0', '031212', 'A*40']
     #
-    # dataList:  ['', '\x00\x04\x02\x10\x00', '5', 'SKP003', '221', 'GPRMC', '210530.00', 'A', '0556.25966', 'N', '07448.89314', 'W', '0.000', '0.0', '201212', 'D*4E']
-    #            [ 0,                      1,   2,        3,     4,       5,           6,   7,            8,   9,            10,  11,     12,     13,       14,    15 ]
+    # dataList:  ['', '\x00\x04\x02\x10\x00', '1', 'SKP000', '206', 'GPRMC', '165919.00', 'A', '0502.30467', 'N', '07527.54462', 'W', '0.000', '0.0', '220217', 'A*4C', '43']
+    #            [ 0,                      1,   2,        3,     4,       5,           6,   7,            8,   9,            10,  11,      12,    13,       14,     15,   16]
     tagDataSKP = {
     #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
                     "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
@@ -155,7 +155,7 @@ class SKPDevice(Device):
                     "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
                     "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
                     "date"  : (14, None, tagDataskp, 'date', skpDate), # Fecha 
-                    "odometro"  : (15, None, tagDataskp, 'odometro', mTokm) # Odómetro
+                    "odometro"  : (16, None, tagDataskp, 'odometro', mTokm) # Odómetro
                  }
 
     def __parse(self, data):
@@ -201,7 +201,7 @@ class SKPDevice(Device):
             # Nominatim:
             #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-        except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+        except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
 
     def __setitem__(self, key, item):
