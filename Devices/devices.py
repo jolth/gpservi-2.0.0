@@ -155,7 +155,7 @@ class SKPDevice(Device):
                     "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
                     "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
                     "date"  : (14, None, tagDataskp, 'date', skpDate), # Fecha 
-                    "odometro"  : (15, None, tagDataskp, 'odometro', None) # Odómetro
+                    "odometro"  : (15, None, tagDataskp, 'odometro', mTokm) # Odómetro
                  }
 
     def __parse(self, data):
