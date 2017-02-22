@@ -82,3 +82,7 @@ def fechaHoraSkp(date, time):
     dt = datetime.combine(date, time)
     #return dt.astimezone(timezone('America/Bogota'))
     return dt.astimezone(timezone(str(utc)))
+
+
+def mTokm(meters):
+    return "{:,}".format(meters / 1000)

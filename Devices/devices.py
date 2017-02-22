@@ -8,13 +8,14 @@ from UserDict import UserDict
 import simplejson as json
 from Gps.Antares.convert import latWgs84ToDecimal, lngWgs84ToDecimal
 from Gps.Antares.secondsTohours import secTohr
-#from Gps.Antares.gpsdate import GpsToMjd, MjdToDate 
 from Gps.SkyPatrol.convert import degTodms, skpDate, skpTime, fechaHoraSkp
+from Gps.SkyPatrol.convert import mTokm
 from Gps.common import MphToKph, NodeToKph
 from Gps.common import ignitionState, ignitionStatett8750
 import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
+
 
 def tagData(dFile, position, bit=None, seek=0):
     """
@@ -28,19 +29,29 @@ def tagData(dFile, position, bit=None, seek=0):
     except: sys.stderr.write("Error al obtener el Tag Data")
     return tagdata
 
-# Clase que actua como un diccionario
+
 class Device(UserDict):
     """ Store Device"""
     def __init__(self, deviceData=None, address=None):
         UserDict.__init__(self)
         self["data"] = deviceData
-        #self["address"] = address
         self["address"] = "%s,%s" % address
-        #self["geocoding"] = None
-        # Fecha y hora (del sistema)
-        # se comenta self['datetime'] para realizar 
-        # el time zone en las Skypatrol
-        #self["datetime"] = datetime.datetime.now()
+
+
+def tagDataskp(dList, start, end, name):
+    """
+        Toma una posición para obtener de la lista dList.
+    """
+    try:
+        if end:
+            tagdata = dList[start:end + 1]
+        else:
+            tagdata = dList[start]
+    except:
+        from datetime import datetime
+        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now())))
+    return tagdata or None
+
 
 class ANTDevice(Device):
     """
@@ -70,35 +81,18 @@ class ANTDevice(Device):
         self.clear()
         try:
             dataFile = StringIO.StringIO(data[1:-1]) # remove '<' y '>'
-            #
             for tag, (position, bit, seek, parseFunc, convertFunc) in self.tagDataANT.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataFile, position, bit, seek)) or parseFunc(dataFile, position, bit, seek)
-
-            # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
+            
             self['altura'] = None
-            # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
-
-            # Date/Datetime
-            #mjd = GpsToMjd(int(self['weeks']), int(self['secondsDay']))
-            #date = MjdToDate(mjd, 1980, 1, 6)
-
-            #self['date'] = MjdToDate(mjd, 1980, 1, 6)
-            #self['date'] = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
-            #self["datetime"] = None 
-
-            #date = ("%d, %d, %d" % (date[0], date[1], date[2]+int(self['dayWeek']))).split(',')
-            #self["date"] = datetime.date(int(date[0]), int(date[1]), int(date[2]))
-            #self["datetime"] = fechaHoraSkp(self["date"], self["time"]) 
-            self["datetime"] = datetime.datetime.fromtimestamp((315964800000 + ((int(self['weeks'])* 7 + int(self['dayWeek'])) * 24 * 60 * 60 + int(self['secondsDay'])) * 1000) // 1000) 
-
-            # Realizamos la Geocodificación. Tratar de no hacer esto
-            # es mejor que se realize por cada cliente con la API de GoogleMap
+            self["datetime"] = datetime.datetime.fromtimestamp((315964800000 +
+                ((int(self['weeks']) * 7 + int(self['dayWeek'])) * 24 * 60 * 60 +
+                    int(self['secondsDay'])) * 1000) // 1000) 
+            
             self["geocoding"] = None
-            #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
-            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # deja de funcionar 16-09-2015
             self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
-        except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+        except Exception: print(sys.exc_info()) 
         finally: dataFile.close()
 
 
@@ -108,21 +102,6 @@ class ANTDevice(Device):
         # Llamamos a __setitem__ de nuestro ancestro
         Device.__setitem__(self, key, item)
 
-def tagDataskp(dList, start, end, name):
-    """
-        Toma una posición para obtener de la lista dList.
-    """
-    try:
-        #if end is not None: 
-        if end:
-            #tagdata = ",".join(dList[start:end + 1])
-            tagdata = dList[start:end + 1]
-        else:
-            tagdata = dList[start]
-    except:
-        from datetime import datetime
-        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now()))) # dList[2] el 'id'
-    return tagdata or None
 
 class SKPDevice(Device):
     """
@@ -154,14 +133,13 @@ class SKPDevice(Device):
                     "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
                     "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
                     "date"  : (14, None, tagDataskp, 'date', skpDate), # Fecha 
-                    "odometro"  : (15, None, tagDataskp, 'odometro', None) # Odómetro
+                    "odometro"  : (15, None, tagDataskp, 'odometro', mTokm) # Odómetro
                  }
 
     def __parse(self, data):
         self.clear()
         try:
             import re
-
             #data = data.replace('\x00\x04\x02\x10\x00',',')
             #print "data0:", data #(Print de Prueba)
             ####
@@ -328,7 +306,7 @@ def typeDevice(data):
                         )
     return typeDev(data) or None #raise
 
-#
+
 def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
     """
         Determina que clase debe manejar un determinado dispositivo y
