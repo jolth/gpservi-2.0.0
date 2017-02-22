@@ -10,6 +10,7 @@ from Gps.Antares.convert import latWgs84ToDecimal, lngWgs84ToDecimal
 from Gps.Antares.secondsTohours import secTohr
 #from Gps.Antares.gpsdate import GpsToMjd, MjdToDate 
 from Gps.SkyPatrol.convert import degTodms, skpDate, skpTime, fechaHoraSkp
+from Gps.SkyPatrol.convert import mTokm
 from Gps.common import MphToKph, NodeToKph
 from Gps.common import ignitionState, ignitionStatett8750
 import Location.geomapgoogle

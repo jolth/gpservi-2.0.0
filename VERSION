@@ -5,3 +5,4 @@
 * mié dic  5 11:48:44 COT 2012: Converting time zones en /Gps/SkyPatrol/convert.py
 * jue ene 31 17:38:07 COT 2013: Cambio de URL para solucitud de servicio web en geomapgoogle.py 'http://maps.googleapis.com/maps/api/geocode/json'.
 * jue ene 31 18:48:02 COT 2013: Se modifoca la función regeocode en geomapgoogle.py.
+* jue feb 16 18:45:51 COT 2017: Odometer 
