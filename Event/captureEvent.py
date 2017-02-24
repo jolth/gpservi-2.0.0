@@ -283,7 +283,6 @@ def event9(data=None): return "Bateri off"
 def parseEvent(data=None):
     """
         Analiza y determina que hacer con cada uno de los eventos.
-
         Llama a getTypeEvent
     """
     # Si es llamable, se llama a la función manajadora. si no, se retorna None 

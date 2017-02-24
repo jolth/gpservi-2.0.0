@@ -105,7 +105,7 @@ class DaemonUDP:
             print >> sys.stdout, rawData#, '\n'
             return # Termina de ejecutar el hilo
 
-        #print rawData # Imprime la data procesada (Print de Prueba)
+        #print "rawData:", rawData #debugging
 
         ### Eventos
         import Event.captureEvent
