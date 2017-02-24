@@ -10,13 +10,15 @@
     load('DAEMON', 'DAEMONHost')
 
 """
-
 import sys
 from ConfigParser import *
 import os
 
 #_ConfigFile = 'config.cfg'
-_ConfigFile = os.getcwd() + '/config.cfg'
+#_ConfigFile = os.getcwd() + '/config.cfg'
+_ConfigFile = os.path.join(os.path.dirname(__file__), 'config.cfg')
+#print(_ConfigFile)
+
 
 
 def load(section, option, archive=_ConfigFile):
