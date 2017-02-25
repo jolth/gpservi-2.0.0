@@ -44,7 +44,8 @@ def insertEvent(evento):
         ###### SQL:
         # Insert Positions:
         queryPositions = """SELECT fn_save_event_position_gps(%(id)s, %(position)s, %(geocoding)s,
-                         %(speed)s, %(altura)s, %(course)s, %(gpsSource)s, %(address)s, %(datetime)s);"""
+                         %(speed)s, %(altura)s, %(course)s, %(gpsSource)s,
+                         %(address)s, %(datetime)s, %(odometer)s);"""
         # Insert Eventos:
         queryEventos = """INSERT INTO eventos(gps_id, positions_gps_id, type, fecha)
                           VALUES (%(gps_id)s, %(positions_id)s, %(codEvent)s, %(datetime)s);"""
