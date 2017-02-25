@@ -37,7 +37,7 @@ like: hostname or ip, port, buffer, etc.
 
 "New" BSD License
 
-Copyright (c) 2012 - 2016 Jorge A. Toro
+Copyright (c) 2012 - 2017 Jorge A. Toro
 
 All rights reserved.
 
