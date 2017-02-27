@@ -259,7 +259,6 @@ class TTDevice(Device):
             #[18]:['', '5', 'TT013', 'D1', 'DF', '$GPRMC', '213210.00', 'A', '0523.663818', 'N', '07535.950195', 'W', '0.0', '0.0', '270217', '4.6', 'E', 'A*24']
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataSKP.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
-
             #print "[%d]:%s" % (len(dataList), dataList)
             #print "-" * 100
             #print self
@@ -273,18 +272,12 @@ class TTDevice(Device):
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
             self["geocoding"] = None
-            #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
-            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # Deja de funcionar 16-09-2015
-            
             #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"],
                     self["lng"]).decodeJSON()
-            print "-" * 100
-            print self
-
+            #print "-" * 100 # debugging
+            #print self # debugging
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
-        #finally: dataFile.close()
-
 
     def __setitem__(self, key, item):
         if key == "data" and item:
