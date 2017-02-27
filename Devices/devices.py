@@ -64,6 +64,7 @@ class ANTDevice(Device):
                     "course"    : (-15, 3, 2, tagData, None),   # Curso en grados
                     "gpsSource" : (-12, 1, 2, tagData, None),   # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR.     
                     "ageData"   : (-11, 1, 2, tagData, None)    # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos)
+                    #odometer
                  }
 
 
@@ -75,6 +76,7 @@ class ANTDevice(Device):
             for tag, (position, bit, seek, parseFunc, convertFunc) in self.tagDataANT.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataFile, position, bit, seek)) or parseFunc(dataFile, position, bit, seek)
 
+            self['odometer'] = None
             # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
             self['altura'] = None
             # Creamos una key para el dato position:
