@@ -95,7 +95,7 @@ class DaemonUDP:
         #import Devices
 
         #print "Data: " + data, "Nombre Hilo: " + self.thread.getName(), "Lock: " + str(lock)
-        print >> sys.stdout, "Data: %s|Hilo: %s" % (data, self.thread.getName())
+        print >> sys.stdout, "Data:%s|Hilo: %s" % (data, self.thread.getName())
         #print "Hilo actual: ", threading.currentThread()
         #print "Hilos presentes:",  threading.enumerate()
 
