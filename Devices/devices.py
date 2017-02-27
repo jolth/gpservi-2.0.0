@@ -164,7 +164,6 @@ class SKPDevice(Device):
         self.clear()
         try:
             import re
-
             #print "DATA:", data
             #data = data.replace('\x00\x04\x02\x10\x00',',')
             #print "data0:", data #(Print de Prueba)
@@ -227,73 +226,63 @@ class TTDevice(Device):
     """
         Dispositivo Skypatrol TT8750 & ENFORA
     """
-    # ['', '\x00\x04\x02\x00', '6', 'SKP001', 'D1', 'DD', '$GPRMC', '205206.00', 'V', '0502.913500', 'N', '07530.315135', 'W', '0.0', '0.0', '201212', '4.6', 'E', 'N*34\x00'] 
-    # ['', '\x00\x04\x02\x00', '1', 'TT1', 'D1', '5E', '$GPRMC', '222202.00', 'A', '0502.874786', 'N', '07530.318359', 'W', '0.0', '0.0', '201212', '4.6', 'E', 'A*24\x00'] 
+    #[18]:['', '5', 'TT013', 'D1', 'DF', '$GPRMC', '213210.00', 'A', '0523.663818', 'N', '07535.950195', 'W', '0.0', '0.0', '270217', '4.6', 'E', 'A*24']
     tagDataSKP = {  # (position_start, position_end, function_tagData, nameTag, function_convert )
-                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                    "id"        : (2, None, tagDataskp, 'id', None), # ID de la unidad
                     "type"      : (0, None, tagDataskp, 'type', None),
-                    "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
-                    "ignition"  : (5, None, tagDataskp, 'ignition', ignitionStatett8750), # 
-
-                    "codEvent"  : (2, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
+                    "typeEvent" : (3, None, tagDataskp, 'typeEvent', None), # 
+                    "ignition"  : (4, None, tagDataskp, 'ignition', ignitionStatett8750), # HACER ESTO 
+                    "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
                     "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
                     "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
-                    "time"      : (7, None, tagDataskp, 'time', skpTime), # Hora expresada en segundos desde 00:00:00AM
-                    "lat"       : (9, 10, tagDataskp, 'lat', degTodms), # Latitud
-                    #"lat"       : (6, tagDataskp, latWgs84ToDecimal),    # Latitud
-                    "lng"       : (11, 12, tagDataskp, 'lng', degTodms), # Longitud
-                    #"lng"       : (23, 9, 0, tagDataskp, lngWgs84ToDecimal),    # Longitud
-                    "speed"     : (13, None, tagDataskp, 'speed', NodeToKph),   # Velocidad en MPH
-                    "course"    : (14, None, tagDataskp, 'course', None), # Curso en grados
+                    "time"      : (6, None, tagDataskp, 'time', skpTime), # Hora expresada en segundos desde 00:00:00AM
+                    "lat"       : (8, 9, tagDataskp, 'lat', degTodms), # Latitud
+                    "lng"       : (10, 11, tagDataskp, 'lng', degTodms), # Longitud
+
+                    "speed"     : (12, None, tagDataskp, 'speed', NodeToKph),   # Velocidad en MPH
+                    "course"    : (13, None, tagDataskp, 'course', None), # Curso en grados
                     "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
                     "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
-                    "date"  : (15, None, tagDataskp, 'date', skpDate), # Fecha 
-                    "odometro"  : (16, None, tagDataskp, 'odometro', None) # Odómetro
+                    "date"  : (14, None, tagDataskp, 'date', skpDate), # Fecha 
+                    "odometer"  : (0, None, tagDataskp, 'odometer', None) # Odómetro
                  }
 
     def __parse(self, data):
         self.clear()
         try:
             import re
-
-            #data = data.replace('\x00\x04\x02\x10\x00',',')
-            #print "data0:", data # (print de Prueba)
-            ####
-            # data = '     5                 SKP87 $GPRMC,122408.00,A,0441.935953,N,07404.450302,W,0.0,0.0,180912,5.5,E,A*2F'
-            data = data.replace(' ', ',')
-            # ',,,,,5,,,,,,,,,,,,,,,,,SKP87,$GPRMC,122408.00,A,0441.935953,N,07404.450302,W,0.0,0.0,180912,5.5,E,A*2F'
-            #print "data1:", data#(Print de Prueba)
-            #data = re.sub(r",,", "", data)
-            # ',5,SKP87,$GPRMC,122408.00,A,0441.935953,N,07404.450302,W,0.0,0.0,180912,5.5,E,A*2F'
-            #print "data2:", data
-            #dataList = data.split(',')
-            dataList = [i for i in data.split(',') if i]
-            # ['', '5', 'SKP87', '$GPRMC', '122408.00', 'A', '0441.935953', 'N', '07404.450302', 'W', '0.0', '0.0', '180912', '5.5', 'E', 'A*2F']
-            #['7', 'SKP002', 'GPRMC', '224431.00', 'A', '0502.87359', 'N', '07530.30060', 'W', '0.000', '0.0', '191012', 'A*47']
-            #
+            data = data.strip().replace(' ',',')
+            dataList = [i for i in data.split(',') if i and i !=
+                    '\x00\x04\x02\x10\x00']
             dataList.insert(0, '')
-            #print "dataList: ", dataList#(Print de Prueba)
+            #print "[%d]:%s" % (len(dataList), dataList)
+            #[18]:['', '5', 'TT013', 'D1', 'DF', '$GPRMC', '213210.00', 'A', '0523.663818', 'N', '07535.950195', 'W', '0.0', '0.0', '270217', '4.6', 'E', 'A*24']
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataSKP.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
 
+            #print "[%d]:%s" % (len(dataList), dataList)
+            #print "-" * 100
+            #print self
+            #raise SystemExit(1)
             # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
             self['altura'] = None
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
-
             # Fecha y Hora del dispositivo:
-            #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
-            #self["datetime"] = datetime.datetime.now()
-
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
             self["geocoding"] = None
             #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
             #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # Deja de funcionar 16-09-2015
-            self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
+            
+            #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"]))
+            self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"],
+                    self["lng"]).decodeJSON()
+            print "-" * 100
+            print self
 
-        except: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+        except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
 
 
