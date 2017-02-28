@@ -179,14 +179,14 @@ class SKPDevice(Device):
             data = data.strip().replace(' ',',')
             dataList = [i for i in data.split(',') if i and i !=
                     '\x00\x04\x02\x10\x00']
-            print "[%d]:%s" % (len(dataList), dataList)
+            #print "[%d]:%s" % (len(dataList), dataList) #debugging
             #dataList = [i for i in data.split(',') if i]
             # ['', '5', 'SKP87', '$GPRMC', '122408.00', 'A', '0441.935953', 'N', '07404.450302', 'W', '0.0', '0.0', '180912', '5.5', 'E', 'A*2F']
             #['7', 'SKP002', 'GPRMC', '224431.00', 'A', '0502.87359', 'N', '07530.30060', 'W', '0.000', '0.0', '191012', 'A*47']
             #
             dataList.insert(0, '') # Crear para los datos que son necesarios.
             #dataList.append('')
-            print "dataList: ", dataList #(Print de Prueba)
+            #print "dataList: ", dataList #(Print de Prueba)
             #raise SystemExit(1)
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataSKP.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
