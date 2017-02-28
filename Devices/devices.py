@@ -253,7 +253,7 @@ class TTDevice(Device):
             import re
             data = data.strip().replace(' ',',')
             dataList = [i for i in data.split(',') if i and i !=
-                    '\x00\x04\x02\x10\x00']
+                    '\x00\x04\x02\x00']
             dataList.insert(0, '')
             #print "[%d]:%s" % (len(dataList), dataList)
             #[18]:['', '5', 'TT013', 'D1', 'DF', '$GPRMC', '213210.00', 'A', '0523.663818', 'N', '07535.950195', 'W', '0.0', '0.0', '270217', '4.6', 'E', 'A*24']
