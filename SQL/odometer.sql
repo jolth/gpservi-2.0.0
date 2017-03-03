@@ -1,5 +1,4 @@
 -- Add columns
-
 BEGIN;
 ALTER TABLE last_positions_gps ADD COLUMN odometer character varying(20);
 COMMIT;
@@ -9,8 +8,6 @@ ALTER TABLE positions_gps ADD COLUMN odometer character varying(20);
 COMMIT;
 
 ----- New:
-DROP FUNCTION public.fn_save_event_position_gps(character varying, point, text, real, real, real, smallint, character varying, timestamp with time zone);
-
 CREATE OR REPLACE FUNCTION public.fn_save_event_position_gps(name_gps character varying, position_ point, ubicacion_ text, velocidad_ real, altura_ real, grados_ real, satelites_ smallint, address_ character varying, fecha_ timestamp with time zone, odometer_ character varying)
  RETURNS record
  LANGUAGE plpgsql
@@ -58,7 +55,6 @@ $function$;
 
 ----- New:
 --DROP TRIGGER ingresar_last_positions_gsp ON positions_gps;
-
 CREATE OR REPLACE FUNCTION public.ingresar_last_positions_gsp()
  RETURNS trigger
  LANGUAGE plpgsql
