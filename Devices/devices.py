@@ -124,7 +124,7 @@ def tagDataskp(dList, start, end, name):
             tagdata = dList[start]
     except:
         from datetime import datetime
-        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[3], dList[2], str(datetime.now()))) # dList[2] el 'id'
+        sys.stderr.write("Error al obtener el Tag Data: %s, %s. Evento: %s [%s].\n" % (name, dList[2], dList[1], str(datetime.now()))) # dList[2] el 'id'
     return tagdata or None
 
 class SKPDevice(Device):
