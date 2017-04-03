@@ -315,7 +315,7 @@ def typeDevice(data):
             >>> 
     """
     # Dispositivos soportados:
-    types = ('ANT', 'SKP', 'TT')
+    types = ('ANT', 'SKP', 'TT', 'GV')
 
     typeDev = lambda dat: ("".join(
                             [d for d in types
