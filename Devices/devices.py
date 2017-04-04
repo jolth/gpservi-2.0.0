@@ -293,6 +293,72 @@ class HUNTDevice(Device):
     pass
 
 
+class GVDevice(Device):
+    """
+        Dispositivo Skypatrol
+    """
+    # dataList:  ['', '\x00\x04\x02\x10\x00', '1', 'SKP000', '206', 'GPRMC', '165919.00', 'A', '0502.30467', 'N', '07527.54462', 'W', '0.000', '0.0', '220217', 'A*4C', '43']
+    # 23022017:  ['5', 'SKP000', '207', 'GPRMC', '231019.00', 'A', '0502.30514', 'N', '07527.55054', 'W', '0.000', '0.0', '230217', 'A*43', '43']
+    # dataList:  ['', '+RESP:GTFRI', '2F0500', '862193026878108', 'GV001', '10', '1', '1', '0.0', '34', '2111.4', '-75.459164', '5.038417', '20170404174939', '0.2', '100', '110000', '053D$']
+    #            [ 0,             1,        2,                 3,       4 ,   5,   6,   7,     8,    9,       10,           11,         12,               13,    14,]
+    tagDataGV = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                }
+                #    "type"      : (0, None, tagDataskp, 'type', None),
+                #    "typeEvent" : (0, None, tagDataskp, 'typeEvent', None), # 
+                #    "ignition"  : (3, None, tagDataskp, 'ignition', ignitionState), # 
+
+                #    "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
+                #    "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
+                #    "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
+                #    "time"      : (5, None, tagDataskp, 'time', skpTime), # Hora expresada en segundos desde 00:00:00AM
+                #    "lat"       : (7, 8, tagDataskp, 'lat', degTodms), # Latitud
+                #    "lng"       : (9, 10, tagDataskp, 'lng', degTodms), # Longitud
+                #    "speed"     : (11, None, tagDataskp, 'speed', NodeToKph),   # Velocidad en MPH
+                #    "course"    : (12, None, tagDataskp, 'course', None), # Curso en grados
+                #    "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
+                #    "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
+                #    "date"  : (13, None, tagDataskp, 'date', skpDate), # Fecha 
+                #    "odometer"  : (15, None, tagDataskp, 'odometer', mTokm) # Odómetro
+                # }
+
+    def __parse(self, data):
+        self.clear()
+        try:
+
+            import re
+            #dataList = data.split(',')
+            dataList = [i for i in data.split(',') if i]
+            dataList.insert(0, '') # Crear para los datos que son necesarios.
+            print "dataList: ", dataList #(Print de Prueba)
+            raise SystemExit(1)
+            for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataGV.items():
+                self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
+
+            # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
+            #self['altura'] = None
+            # Creamos una key para el dato position:
+            #self['position'] = "(%(lat)s,%(lng)s)" % self
+            # Fecha y Hora del dispositivo:
+            #self["datetime"] = fechaHoraSkp(self["date"], self["time"])
+            # Realizamos la Geocodificación. Tratar de no hacer esto
+            # es mejor que se realize por cada cliente con la API de GoogleMap
+            #self["geocoding"] = None
+            # Nominatim:
+            #self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
+            print "-" * 20
+            print self
+            raise SystemExit
+        except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+
+    def __setitem__(self, key, item):
+        if key == "data" and item:
+            self.__parse(item)
+        # Llamamos a __setitem__ de nuestro ancestro
+        Device.__setitem__(self, key, item)
+
+
 def typeDevice(data):
     """
         Determina que tipo de Dispositivo GPS es dueña de la data.
