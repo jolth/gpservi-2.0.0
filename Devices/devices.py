@@ -147,7 +147,6 @@ class SKPDevice(Device):
                     "type"      : (0, None, tagDataskp, 'type', None),
                     "typeEvent" : (0, None, tagDataskp, 'typeEvent', None), # 
                     "ignition"  : (3, None, tagDataskp, 'ignition', ignitionState), # 
-
                     "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
                     "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
                     "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
@@ -211,9 +210,9 @@ class SKPDevice(Device):
             # Nominatim:
             #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-            #print "-" * 20
-            #print self
-            #raise SystemExit
+            print "-" * 20
+            print self
+            raise SystemExit
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
 
@@ -309,16 +308,16 @@ class GVDevice(Device):
                     "type"      : (4, None, tagDataskp, 'type', None),
                     "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
                     "altura"    : (10, None, tagDataskp, 'altura', None),
-                    "ignition"  : (24, None, tagDataskp, 'ignition', convert.gv_device_status), # 
+                    "ignition"  : (24, None, tagDataskp, 'ignition', None), # 
                 #    "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
-                #    "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
-                #    "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
+                    "weeks"     : (4, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
+                    "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
                     "lat"       : (12, None, tagDataskp, 'lat', None), # Latitud
                     "lng"       : (11, None, tagDataskp, 'lng', None), # Longitud
                     "speed"     : (8, None, tagDataskp, 'speed', None),   # Velocidad en MPH
                     "course"    : (9, None, tagDataskp, 'course', None), # azumuth
-                #    "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
-                #    "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
+                    "gpsSource" : (4, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
+                    "ageData"   : (4, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
                     "date"      : (13, None, tagDataskp, 'date', convert.gv_date), # Fecha 
                     "time"      : (13, None, tagDataskp, 'time', convert.gv_time), # Hora expresada en segundos desde 00:00:00AM
                     "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
@@ -334,24 +333,19 @@ class GVDevice(Device):
             dataList = data.split(',') # Crear para los datos que son necesarios.
             print "dataList[%s]: %s" % (len(dataList), dataList) #(Print de Prueba)
             #raise SystemExit(1)
-            #ignitions:
+            #if not ignitions:
             if len(dataList) < 23:
                 self.tagDataGV['ignition'] = (4, None, tagDataskp, 'ignition', None) 
 
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataGV.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
-            
-
-
-            # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
-            #self['altura'] = None
+            #device status
+            if len(dataList) > 22:
+                self["ignition"] = convert.gv_device_status(self["ignition"], tag="ignition")
             # Creamos una key para el dato position:
-            #self['position'] = "(%(lat)s,%(lng)s)" % self
+            self['position'] = "(%(lat)s,%(lng)s)" % self
             # Fecha y Hora del dispositivo:
             #self["datetime"] = fechaHoraSkp(self["date"], self["time"])
-            # Realizamos la Geocodificación. Tratar de no hacer esto
-            # es mejor que se realize por cada cliente con la API de GoogleMap
-            #self["geocoding"] = None
             # Nominatim:
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
             print "-" * 20
