@@ -326,7 +326,7 @@ class GVDevice(Device):
                     "time"      : (13, None, tagDataskp, 'time', convert.gv_time), # Hora expresada en segundos desde 00:00:00AM
                     "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
                 }
-    # Event Report
+    # Event Report: +RESP:GTIGN, +RESP:GTIGF
     # [22]: ['+RESP:GTIGN', '2F0500', '862193026878108', 'GV001', '', '9274', '0', '0.0', '0', '2139.0', '-75.459166', '5.038386', '20170406170427', '', '', '', '', '', '', '0.7', '', '0EC3$']
     #       [            0,        1,                 2,       3, 4 ,      5,   6,     7,   8,        9,           10,         11,               12, 13, 14, 15, 16, 17, 18,    19, 20,      21]
     tag_event_report = {
@@ -349,6 +349,30 @@ class GVDevice(Device):
                     "time"      : (12, None, tagDataskp, 'time', convert.gv_time), #Time
                     "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
             }
+    # Event Report: +RESP:GTMPN:, +RESP:GTMPF:, +RESP:GTBTC:, +RESP:GTCRA:
+    # [19]: ['+RESP:GTMPF', '2F0500', '862193026878108', 'GV001', '', '0', '0.0', '0', '2139.3', '-75.459194', '5.038412', '20170406210524', '', '', '', '', '', '', '1050$']
+    #       [            0,        1,                 2,       3, 4 ,   5,     6,   7,        8,            9,         10,               11, 12, 13, 14, 15, 16, 17,     18,]
+    tag_event_bub_crash = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                    "type"      : (4, None, tagDataskp, 'type', None),
+                    "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
+                    "altura"    : (8, None, tagDataskp, 'altura', None),
+                    "ignition"  : (24, None, tagDataskp, 'ignition', None), #altered for "ignition state" more below 
+                    "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
+                    "weeks"     : (4, None, tagDataskp, 'weeks', None), 
+                    "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None),
+                    "lat"       : (10, None, tagDataskp, 'lat', None), # Latitud
+                    "lng"       : (9, None, tagDataskp, 'lng', None), #Longitud
+                    "speed"     : (6, None, tagDataskp, 'speed', None), #velocidad en KM
+                    "course"    : (7, None, tagDataskp, 'course', None), # azumuth
+                    "gpsSource" : (4, None, tagDataskp, 'gpsSource', None), 
+                    "ageData"   : (4, None, tagDataskp, 'ageData', None), 
+                    "date"      : (11, None, tagDataskp, 'date', convert.gv_date), #Date 
+                    "time"      : (11, None, tagDataskp, 'time', convert.gv_time), #Time
+                    "odometer"  : (4, None, tagDataskp, 'odometer', None) # Odómetro
+            }
+
 
     def __parse(self, data):
         self.clear()
@@ -358,12 +382,14 @@ class GVDevice(Device):
             if dataList[4]:
                 dataList.insert(4, '')
             print "dataList[%s]: %s" % (len(dataList), dataList) #(Print de Prueba)
+            #raise SystemExit(1)
             #select type of 'stack'
             if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
                 stack = self.tag_event_report
+            elif dataList[0] == '+RESP:GTMPN' or dataList[0] == '+RESP:GTMPF':
+                stack = self.tag_event_bub_crash
             else: stack = self.tagDataGV
 
-            #raise SystemExit(1)
             # ignition state
             if len(dataList) < 23:
                 stack['ignition'] = (4, None, tagDataskp, 'ignition', None)
