@@ -6,7 +6,6 @@ def gv_time(time):
     """return time"""
     return time[-6:]
 
-
 def gv_date(date):
     """return date"""
     return date[:8]
@@ -30,3 +29,8 @@ def gv_device_status(status, tag=None):
 
 def gv_get_event_code(event):
     """get the event code"""
+    if event == '+RESP:GTFRI': return 5 #programated report
+    elif event == '+RESP:GTSOS': return 1 #panic report
+    elif event == '+RESP:GTIGN': return 6 #ignition on report
+    elif event == '+RESP:GTIGF': return 7 #ignition off report
+    else: return None

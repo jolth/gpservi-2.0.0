@@ -210,9 +210,9 @@ class SKPDevice(Device):
             # Nominatim:
             #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-            print "-" * 20
-            print self
-            raise SystemExit
+            #print "-" * 20
+            #print self
+            #raise SystemExit
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
 
@@ -298,10 +298,14 @@ class GVDevice(Device):
     """
         Dispositivo Skypatrol
     """
-    # dataList:  ['', '+RESP:GTSOS', '2F0500', '862193026878108', 'GV001', '10', '1', '1', '0.0', '313', '2144.3', '-75.459155', '5.038422', '20170405165113', '0.2', '0717$']
-    # dataList:  ['', '+RESP:GTFRI', '2F0500', '862193026878108', 'GV001', '10', '1', '1', '0.0', '313', '2144.3', '-75.459155', '5.038422', '20170405161122', '0.2', '100', '210100', '06C3$']
-    # dataList:  ['', '+RESP:GTFRI', '2F0500', '862193026878108', 'GV001', '10', '1', '1', '0.0', '34', '2111.4', '-75.459164', '5.038417', '20170404174939', '0.2', '100', '110000', '053D$']
-    #            [ 0,             1,        2,                 3,       4 ,   5,   6,   7,     8,    9,       10,           11,         12,               13,    14,    15,       16,      17]
+    # Position Related Report
+    # [23]: ['+RESP:GTSOS', '2F0500', '862193026878108', 'GV001', '', '', '10', '1', '1', '0.0', '0', '2139.3', '-75.459194', '5.038412', '20170406171445', '', '', '', '', '', '0.7', '', '0EDC$']
+    # Fixed report
+    # [31]: ['+RESP:GTFRI', '2F0500', '862193026878108', 'GV001', '', '', '10', '1', '1', '0.0', '0', '2139.0', '-75.459166', '5.038386', '20170406142915', '', '', '', '', '', '0.7', '', '', '', '100', '210100', '', '', '', '', '0E20$']
+    #       [ 0,             1,        2,                 3,       4 ,   5,   6,   7,     8,    9,       10,           11,         12,               13,    14,    15,       16,      17]
+    # Not support:
+    # Device Information Report
+    # Report of Real Time Querying
     tagDataGV = {
     #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
                     "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
@@ -309,7 +313,7 @@ class GVDevice(Device):
                     "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
                     "altura"    : (10, None, tagDataskp, 'altura', None),
                     "ignition"  : (24, None, tagDataskp, 'ignition', None), # 
-                #    "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
+                    "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
                     "weeks"     : (4, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
                     "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
                     "lat"       : (12, None, tagDataskp, 'lat', None), # Latitud
@@ -322,22 +326,49 @@ class GVDevice(Device):
                     "time"      : (13, None, tagDataskp, 'time', convert.gv_time), # Hora expresada en segundos desde 00:00:00AM
                     "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
                 }
+    # Event Report
+    # [22]: ['+RESP:GTIGN', '2F0500', '862193026878108', 'GV001', '', '9274', '0', '0.0', '0', '2139.0', '-75.459166', '5.038386', '20170406170427', '', '', '', '', '', '', '0.7', '', '0EC3$']
+    #       [            0,        1,                 2,       3, 4 ,      5,   6,     7,   8,        9,           10,         11,               12, 13, 14, 15, 16, 17, 18,    19, 20,      21]
+    tag_event_report = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                    "type"      : (4, None, tagDataskp, 'type', None),
+                    "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
+                    "altura"    : (9, None, tagDataskp, 'altura', None),
+                    "ignition"  : (24, None, tagDataskp, 'ignition', None), #altered for "ignition state" more below 
+                    "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
+                    "weeks"     : (4, None, tagDataskp, 'weeks', None), 
+                    "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None),
+                    "lat"       : (11, None, tagDataskp, 'lat', None), # Latitud
+                    "lng"       : (10, None, tagDataskp, 'lng', None), #Longitud
+                    "speed"     : (7, None, tagDataskp, 'speed', None), #velocidad en KM
+                    "course"    : (8, None, tagDataskp, 'course', None), # azumuth
+                    "gpsSource" : (4, None, tagDataskp, 'gpsSource', None), 
+                    "ageData"   : (4, None, tagDataskp, 'ageData', None), 
+                    "date"      : (12, None, tagDataskp, 'date', convert.gv_date), #Date 
+                    "time"      : (12, None, tagDataskp, 'time', convert.gv_time), #Time
+                    "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
+            }
 
     def __parse(self, data):
         self.clear()
+        stack = None
         try:
-
-            import re
-            print("Entra a GV55")
-            #dataList = [i for i in data.split(',') if i]
             dataList = data.split(',') # Crear para los datos que son necesarios.
+            if dataList[4]:
+                dataList.insert(4, '')
             print "dataList[%s]: %s" % (len(dataList), dataList) #(Print de Prueba)
-            #raise SystemExit(1)
-            #if not ignitions:
-            if len(dataList) < 23:
-                self.tagDataGV['ignition'] = (4, None, tagDataskp, 'ignition', None) 
+            #select type of 'stack'
+            if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
+                stack = self.tag_event_report
+            else: stack = self.tagDataGV
 
-            for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataGV.items():
+            #raise SystemExit(1)
+            # ignition state
+            if len(dataList) < 23:
+                stack['ignition'] = (4, None, tagDataskp, 'ignition', None)
+
+            for tag, (position_start, position_end, parseFunc,nameTag,convertFunc) in stack.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
             #device status
             if len(dataList) > 22:
