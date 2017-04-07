@@ -386,9 +386,10 @@ class GVDevice(Device):
             #print "dataList[%s]: %s" % (len(dataList), dataList) #(Print de Prueba)
             #raise SystemExit(1)
             #select type of 'stack'
-            if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
+            #if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
+            if ('GTIGN' in dataList[0]) or ('GTIGF' in dataList[0]):
                 stack = self.tag_event_report
-            elif dataList[0] == '+RESP:GTMPN' or dataList[0] == '+RESP:GTMPF':
+            elif ('GTMPN' in dataList[0]) or ('GTMPF' in dataList[0]):
                 stack = self.tag_event_bub_crash
             #else: stack = self.tagDataGV
             #print "-" * 20

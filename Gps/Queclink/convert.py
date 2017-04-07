@@ -32,11 +32,18 @@ def gv_device_status(status, tag=None):
 
 def gv_get_event_code(event):
     """get the event code"""
-    if event == '+RESP:GTFRI': return '5' #programated report
-    elif event == '+RESP:GTSOS': return '1' #panic report
-    elif event == '+RESP:GTSPD': return '2' #speed alarm
-    elif event == '+RESP:GTIGN': return '6' #ignition on report
-    elif event == '+RESP:GTIGF': return '7' #ignition off report
-    elif event == '+RESP:GTMPN': return '8' #connecting main power supply   
-    elif event == '+RESP:GTMPF': return '9' #disconnecting main power supply
+    #if event == '+RESP:GTFRI': return '5' #programated report
+    #elif event == '+RESP:GTSOS': return '1' #panic report
+    #elif event == '+RESP:GTSPD': return '2' #speed alarm
+    #elif event == '+RESP:GTIGN': return '6' #ignition on report
+    #elif event == '+RESP:GTIGF': return '7' #ignition off report
+    #elif event == '+RESP:GTMPN': return '8' #connecting main power supply   
+    #elif event == '+RESP:GTMPF': return '9' #disconnecting main power supply
+    if event[6:] == 'GTFRI': return '5' #programated report
+    elif event[6:] == 'GTSOS': return '1' #panic report
+    elif event[6:] == 'GTSPD': return '2' #speed alarm
+    elif event[6:] == 'GTIGN': return '6' #ignition on report
+    elif event[6:] == 'GTIGF': return '7' #ignition off report
+    elif event[6:] == 'GTMPN': return '8' #connecting main power supply   
+    elif event[6:] == 'GTMPF': return '9' #disconnecting main power supply
     else: return None
