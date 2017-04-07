@@ -1,0 +1,2 @@
+
+insert into type_gps (codigo,name,descrip) values (4, 'GV', 'Queclink');
