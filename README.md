@@ -10,7 +10,7 @@ Jorge A.Toro [jolthgs@gmail.com]
 
 ## Description:
 
-Open source server UDP for GPS tracking devices. Include support for GPS trackers: TT8750, TT8750+, TT9500, Enfora and ANTARES.
+Open source server UDP for GPS tracking devices. Include support for GPS trackers: TT8750, TT8750+, TT9500, Enfora, ANTARES, Queclink.
 GPServi is written in Python and should work on most platforms with installed Python.
 
 

@@ -16,6 +16,8 @@ from Gps.common import ignitionState, ignitionStatett8750
 import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
+from Gps.Queclink import convert
+
 
 def tagData(dFile, position, bit=None, seek=0):
     """
@@ -145,7 +147,6 @@ class SKPDevice(Device):
                     "type"      : (0, None, tagDataskp, 'type', None),
                     "typeEvent" : (0, None, tagDataskp, 'typeEvent', None), # 
                     "ignition"  : (3, None, tagDataskp, 'ignition', ignitionState), # 
-
                     "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
                     "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
                     "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
@@ -293,6 +294,129 @@ class HUNTDevice(Device):
     pass
 
 
+class GVDevice(Device):
+    """
+        Dispositivo Skypatrol
+    """
+    # Position Related Report
+    # [23]: ['+RESP:GTSOS', '2F0500', '862193026878108', 'GV001', '', '', '10', '1', '1', '0.0', '0', '2139.3', '-75.459194', '5.038412', '20170406171445', '', '', '', '', '', '0.7', '', '0EDC$']
+    # Fixed report
+    # [31]: ['+RESP:GTFRI', '2F0500', '862193026878108', 'GV001', '', '', '10', '1', '1', '0.0', '0', '2139.0', '-75.459166', '5.038386', '20170406142915', '', '', '', '', '', '0.7', '', '', '', '100', '210100', '', '', '', '', '0E20$']
+    #       [ 0,             1,        2,                 3,       4 ,   5,   6,   7,     8,    9,       10,           11,         12,               13,    14,    15,       16,      17]
+    # Not support:
+    # Device Information Report
+    # Report of Real Time Querying
+    tagDataGV = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                    "type"      : (4, None, tagDataskp, 'type', None),
+                    "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
+                    "altura"    : (10, None, tagDataskp, 'altura', None),
+                    "ignition"  : (24, None, tagDataskp, 'ignition', None), # 
+                    "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
+                    "weeks"     : (4, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
+                    "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
+                    "lat"       : (12, None, tagDataskp, 'lat', None), # Latitud
+                    "lng"       : (11, None, tagDataskp, 'lng', None), # Longitud
+                    "speed"     : (8, None, tagDataskp, 'speed', None),   # Velocidad en MPH
+                    "course"    : (9, None, tagDataskp, 'course', None), # azumuth
+                    "gpsSource" : (4, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
+                    "ageData"   : (4, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
+                    "date"      : (13, None, tagDataskp, 'date', convert.gv_date), # Fecha 
+                    "time"      : (13, None, tagDataskp, 'time', convert.gv_time), # Hora expresada en segundos desde 00:00:00AM
+                    "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
+                }
+    # Event Report: +RESP:GTIGN, +RESP:GTIGF
+    # [22]: ['+RESP:GTIGN', '2F0500', '862193026878108', 'GV001', '', '9274', '0', '0.0', '0', '2139.0', '-75.459166', '5.038386', '20170406170427', '', '', '', '', '', '', '0.7', '', '0EC3$']
+    #       [            0,        1,                 2,       3, 4 ,      5,   6,     7,   8,        9,           10,         11,               12, 13, 14, 15, 16, 17, 18,    19, 20,      21]
+    tag_event_report = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                    "type"      : (4, None, tagDataskp, 'type', None),
+                    "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
+                    "altura"    : (9, None, tagDataskp, 'altura', None),
+                    "ignition"  : (24, None, tagDataskp, 'ignition', None), #altered for "ignition state" more below 
+                    "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
+                    "weeks"     : (4, None, tagDataskp, 'weeks', None), 
+                    "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None),
+                    "lat"       : (11, None, tagDataskp, 'lat', None), # Latitud
+                    "lng"       : (10, None, tagDataskp, 'lng', None), #Longitud
+                    "speed"     : (7, None, tagDataskp, 'speed', None), #velocidad en KM
+                    "course"    : (8, None, tagDataskp, 'course', None), # azumuth
+                    "gpsSource" : (4, None, tagDataskp, 'gpsSource', None), 
+                    "ageData"   : (4, None, tagDataskp, 'ageData', None), 
+                    "date"      : (12, None, tagDataskp, 'date', convert.gv_date), #Date 
+                    "time"      : (12, None, tagDataskp, 'time', convert.gv_time), #Time
+                    "odometer"  : (19, None, tagDataskp, 'odometer', None) # Odómetro
+            }
+    # Event Report: +RESP:GTMPN:, +RESP:GTMPF:, +RESP:GTBTC:, +RESP:GTCRA:
+    # [19]: ['+RESP:GTMPF', '2F0500', '862193026878108', 'GV001', '', '0', '0.0', '0', '2139.3', '-75.459194', '5.038412', '20170406210524', '', '', '', '', '', '', '1050$']
+    #       [            0,        1,                 2,       3, 4 ,   5,     6,   7,        8,            9,         10,               11, 12, 13, 14, 15, 16, 17,     18,]
+    tag_event_bub_crash = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (3, None, tagDataskp, 'id', None), # ID de la unidad
+                    "type"      : (4, None, tagDataskp, 'type', None),
+                    "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
+                    "altura"    : (8, None, tagDataskp, 'altura', None),
+                    "ignition"  : (24, None, tagDataskp, 'ignition', None), #altered for "ignition state" more below 
+                    "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
+                    "weeks"     : (4, None, tagDataskp, 'weeks', None), 
+                    "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None),
+                    "lat"       : (10, None, tagDataskp, 'lat', None), # Latitud
+                    "lng"       : (9, None, tagDataskp, 'lng', None), #Longitud
+                    "speed"     : (6, None, tagDataskp, 'speed', None), #velocidad en KM
+                    "course"    : (7, None, tagDataskp, 'course', None), # azumuth
+                    "gpsSource" : (4, None, tagDataskp, 'gpsSource', None), 
+                    "ageData"   : (4, None, tagDataskp, 'ageData', None), 
+                    "date"      : (11, None, tagDataskp, 'date', convert.gv_date), #Date 
+                    "time"      : (11, None, tagDataskp, 'time', convert.gv_time), #Time
+                    "odometer"  : (4, None, tagDataskp, 'odometer', None) # Odómetro
+            }
+
+
+    def __parse(self, data):
+        self.clear()
+        stack = None
+        try:
+            dataList = data.split(',') # Crear para los datos que son necesarios.
+            if dataList[4]:
+                dataList.insert(4, '')
+            print "dataList[%s]: %s" % (len(dataList), dataList) #(Print de Prueba)
+            #raise SystemExit(1)
+            #select type of 'stack'
+            if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
+                stack = self.tag_event_report
+            elif dataList[0] == '+RESP:GTMPN' or dataList[0] == '+RESP:GTMPF':
+                stack = self.tag_event_bub_crash
+            else: stack = self.tagDataGV
+
+            # ignition state
+            if len(dataList) < 23:
+                stack['ignition'] = (4, None, tagDataskp, 'ignition', None)
+
+            for tag, (position_start, position_end, parseFunc,nameTag,convertFunc) in stack.items():
+                self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
+            #device status
+            if len(dataList) > 22:
+                self["ignition"] = convert.gv_device_status(self["ignition"], tag="ignition")
+            # Creamos una key para el dato position:
+            self['position'] = "(%(lat)s,%(lng)s)" % self
+            # Fecha y Hora del dispositivo:
+            self["datetime"] = fechaHoraSkp(self["date"], self["time"])
+            # Nominatim:
+            self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
+            #print "-" * 20
+            #print self
+            #raise SystemExit
+        except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+
+    def __setitem__(self, key, item):
+        if key == "data" and item:
+            self.__parse(item)
+        # Llamamos a __setitem__ de nuestro ancestro
+        Device.__setitem__(self, key, item)
+
+
 def typeDevice(data):
     """
         Determina que tipo de Dispositivo GPS es dueña de la data.
@@ -315,7 +439,7 @@ def typeDevice(data):
             >>> 
     """
     # Dispositivos soportados:
-    types = ('ANT', 'SKP', 'TT')
+    types = ('ANT', 'SKP', 'TT', 'GV')
 
     typeDev = lambda dat: ("".join(
                             [d for d in types
