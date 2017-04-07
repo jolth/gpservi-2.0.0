@@ -4,11 +4,14 @@ from pytz import timezone
 
 def gv_time(time):
     """return time"""
-    return time[-6:]
-
+    #return time[-6:]
+    return datetime.time(int(time[-6:][:2]), int(time[-6:][2:4]),
+            int(time[-6:][-2:]), tzinfo=timezone('UTC'))
+    
 def gv_date(date):
     """return date"""
-    return date[:8]
+    #return date[:8]
+    return datetime.date(int(date[:8][:-4]), int(date[:8][4:6]), int(date[:8][6:]))
 
 def gv_device_status(status, tag=None): 
     """return status the of device"""
