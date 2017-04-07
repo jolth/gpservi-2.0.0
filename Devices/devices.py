@@ -210,8 +210,8 @@ class SKPDevice(Device):
             # Nominatim:
             #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-            #print "-" * 20
-            #print self
+            print "-" * 20
+            print self
             #raise SystemExit
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
@@ -312,7 +312,8 @@ class GVDevice(Device):
                     "type"      : (4, None, tagDataskp, 'type', None),
                     "typeEvent" : (4, None, tagDataskp, 'typeEvent', None), # 
                     "altura"    : (10, None, tagDataskp, 'altura', None),
-                    "ignition"  : (24, None, tagDataskp, 'ignition', None), # 
+                    "ignition"  : (4, None, tagDataskp, 'ignition', None), # 
+                    #"ignition"  : (24, None, tagDataskp, 'ignition', None), # 
                     "codEvent"  : (0, None, tagDataskp, 'codEvent', convert.gv_get_event_code),
                     "weeks"     : (4, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
                     "dayWeek"   : (4, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
@@ -376,7 +377,8 @@ class GVDevice(Device):
 
     def __parse(self, data):
         self.clear()
-        stack = None
+        stack = self.tagDataGV
+
         try:
             dataList = data.split(',') # Crear para los datos que son necesarios.
             if dataList[4]:
@@ -384,29 +386,33 @@ class GVDevice(Device):
             print "dataList[%s]: %s" % (len(dataList), dataList) #(Print de Prueba)
             #raise SystemExit(1)
             #select type of 'stack'
-            if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
-                stack = self.tag_event_report
-            elif dataList[0] == '+RESP:GTMPN' or dataList[0] == '+RESP:GTMPF':
-                stack = self.tag_event_bub_crash
-            else: stack = self.tagDataGV
+            #if dataList[0] == '+RESP:GTIGN' or dataList[0] == '+RESP:GTIGF':
+            #    stack = self.tag_event_report
+            #elif dataList[0] == '+RESP:GTMPN' or dataList[0] == '+RESP:GTMPF':
+            #    stack = self.tag_event_bub_crash
+            #else: stack = self.tagDataGV
+            print "-" * 20
+            print self
 
             # ignition state
-            if len(dataList) < 23:
-                stack['ignition'] = (4, None, tagDataskp, 'ignition', None)
+            #if len(dataList) < 23:
+            #    stack['ignition'] = (4, None, tagDataskp, 'ignition', None)
 
             for tag, (position_start, position_end, parseFunc,nameTag,convertFunc) in stack.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
+            print "-" * 20
+            print self
             #device status
-            if len(dataList) > 22:
-                self["ignition"] = convert.gv_device_status(self["ignition"], tag="ignition")
+            #if len(dataList) > 22:
+            #    self["ignition"] = convert.gv_device_status(self["ignition"], tag="ignition")
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
             # Fecha y Hora del dispositivo:
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
             # Nominatim:
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-            #print "-" * 20
-            #print self
+            print "-" * 20
+            print self
             #raise SystemExit
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
 
