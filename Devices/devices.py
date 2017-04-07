@@ -410,6 +410,7 @@ class GVDevice(Device):
             # Fecha y Hora del dispositivo:
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
             # Nominatim:
+            self["geocoding"] = None
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
             #print "-" * 20
             #print self
