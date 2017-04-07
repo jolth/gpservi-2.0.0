@@ -405,9 +405,9 @@ class GVDevice(Device):
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
             # Nominatim:
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-            print "-" * 20
-            print self
-            raise SystemExit
+            #print "-" * 20
+            #print self
+            #raise SystemExit
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
 
     def __setitem__(self, key, item):
