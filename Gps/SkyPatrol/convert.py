@@ -85,4 +85,4 @@ def fechaHoraSkp(date, time):
     return dt.astimezone(timezone(str(utc)))
 
 def mTokm(meters):
-    return "{:,} km".format(int(meters) / 1000)
+    return "{:,}".format(int(meters) / 1000)
