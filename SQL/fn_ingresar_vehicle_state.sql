@@ -21,21 +21,6 @@ BEGIN
 
  --select max(vsh.id) FROM vehiculos v, vehicle_state_history vsh WHERE vsh.vehicle_id=v.id AND v.placa=lower('RJM270');
  SELECT INTO id_ max(id) FROM vehicle_state_history WHERE vehicle_id=vehiculo_id;
- --IF NOT FOUND THEN
-  --RETURN NULL;
- --END IF;
-
- /*IF id_=NULL THEN
- --ELSE
-  --RETURN NULL;
-  INSERT INTO vehicle_state_history (vehicle_id,
-                motor,
-                car,
-                doors,
-                battery_gps, fecha, horometer) VALUES (vehiculo_id, motor_, car_, doors_, battery_gps_, fecha_, 0) RETURNING vehiculo_id INTO retorno;
-  --RETURN NULL;
-  --SELECT INTO id_ max(id) FROM vehicle_state_history WHERE vehicle_id=vehiculo_id;
- END IF;*/
 
  -- select last state of IGN:
  SELECT INTO last_state_ign motor FROM vehicle_state_history WHERE id=id_;--vehicle_id=vehiculo_id;
@@ -60,8 +45,8 @@ BEGIN
                 battery_gps, fecha) = ( vehiculo_id, motor_, car_, doors_, battery_gps_, fecha_)
         WHERE (vehicle_id = vehiculo_id) RETURNING vehiculo_id INTO retorno;*/
  -- update state IGN and horometer:
- SELECT fn_insert_ingnition_state(gps_id_, motor_, car_, doors_, battery_gps_, fecha_) INTO retorno;
- --PERFORM fn_insert_ingnition_state(gps_id_, motor_, car_, doors_, battery_gps_, fecha_);
+ --SELECT fn_insert_ingnition_state(gps_id_, motor_, car_, doors_, battery_gps_, fecha_) INTO retorno;
+ PERFORM fn_insert_ingnition_state(gps_id_, motor_, car_, doors_, battery_gps_, fecha_);
 
  IF not found THEN
   INSERT INTO vehicle_state VALUES (vehiculo_id, motor_, car_, doors_, battery_gps_, fecha_) RETURNING vehiculo_id INTO retorno;
