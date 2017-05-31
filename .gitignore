@@ -1,3 +1,5 @@
 *pyc
 *bk
 *.test
+*.aux
+.gitignore
