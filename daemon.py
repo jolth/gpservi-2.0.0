@@ -74,6 +74,13 @@ class DaemonUDP:
                     #print >> sys.stderr, "**** SendDevice ****\n"
                     from SendDevices import SD
                     SD.sendData(fdata, self.server, address, data)
+                # Send configuration from UDP to all AVL
+                #if data.find('SKP'):
+                #    command = 'AT$TTNR=1200,0&W'
+                #    head = '\x00\x01\x04\x00 '
+                #    self.server.sendto(head + command, address)
+                #    d, s = self.server.recvfrom(4096)
+                #    print >> sys.stderr, "%s\n%s : %s\n%s" % ("#"*30, d, data, "#"*30)
 
                 self.thread = threading.Thread(target=self.threads, args=(data, address, self.__class__.lock, ))
                 self.thread.start()
