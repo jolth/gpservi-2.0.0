@@ -15,6 +15,11 @@ def gv_date(date):
 
 def gv_device_status(status, tag=None): 
     """return status the of device"""
+
+    # detection digital input(IGN) trame :GTFRI
+    if len(status) == 2 and tag == 'ignition':
+        return 't' if int(status, 2) > 0 else 'f'
+
     s = int(status[:2],16)
     if tag is not None:
         if tag == 'ignition':
