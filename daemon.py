@@ -77,6 +77,7 @@ class DaemonUDP:
                 # Send configuration from UDP to all AVL
                 #if data.find('SKP'):
                 #    command = 'AT$TTNR=1200,0&W'
+                #    command = 'AT$TTSMSDST=4,"85482"&W'
                 #    head = '\x00\x01\x04\x00 '
                 #    self.server.sendto(head + command, address)
                 #    d, s = self.server.recvfrom(4096)
