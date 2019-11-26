@@ -201,6 +201,9 @@ class SKPDevice(Device):
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
 
+            print "-" * 20
+            print self
+            raise SystemExit(1)
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
             self["geocoding"] = None
@@ -212,7 +215,7 @@ class SKPDevice(Device):
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
             #print "-" * 20
             #print self
-            #raise SystemExit
+            #raise SystemExit(1)
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
 
@@ -425,6 +428,91 @@ class GVDevice(Device):
         Device.__setitem__(self, key, item)
 
 
+class imeiDevice(Device):
+    """
+        Dispositivo TK303F
+    """
+    # dataList:  ['', '\x00\x04\x02\x10\x00', '1', 'SKP000', '206', 'GPRMC', '165919.00', 'A', '0502.30467', 'N', '07527.54462', 'W', '0.000', '0.0', '220217', 'A*4C', '43']
+    #            [ 0,                      1,   2,        3,     4,       5,           6,   7,            8,   9,            10,  11,      12,    13,       14,     15,   16]
+    # 23022017:  ['5', 'SKP000', '207', 'GPRMC', '231019.00', 'A', '0502.30514', 'N', '07527.55054', 'W', '0.000', '0.0', '230217', 'A*43', '43']
+    #            [  0,        1,     2,       3,           4,   5,            6,   7,             8,   9,      10,    11,       12,     13,  14,]
+
+    # ['imei', '864180038790106', 'tracker', '191120155455', '', 'F', '205455.00', 'A', '0502.30489', 'N', '07527.55108', 'W', '0.000', '0', '']
+    # [     0,                 1,         2,              3,  4,   5,           6,   7,            8,   9,            10,  11,      12,  13, 14]
+    # [     0,                 1,         2,              3,  4,   5,           6,   7,            8,   9,            10,  11,      12,  13, 14]
+    tagDataTK = {
+    #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
+                    "id"        : (1, None, tagDataskp, 'id', None), # ID de la unidad
+    #                "type"      : (0, None, tagDataskp, 'type', None),
+    #                "typeEvent" : (0, None, tagDataskp, 'typeEvent', None), # 
+
+    #                "ignition"  : (15, None, tagDataskp, 'ignition', None), # REVISAR para agregar en la trama 
+
+    #                "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
+    #                "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
+    #                "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
+    #                "time"      : (5, None, tagDataskp, 'time', skpTime), # Hora expresada en segundos desde 00:00:00AM
+                    "lat"       : (8, 9, tagDataskp, 'lat', degTodms), # Latitud
+                    "lng"       : (10, 11, tagDataskp, 'lng', degTodms), # Longitud
+
+                    "speed"     : (12, None, tagDataskp, 'speed', None), # REVISAR que si concuerde  
+                    "course"    : (13, None, tagDataskp, 'course', None), # Curso en grados - REVISAR
+    #                "altura"    : (14, None, tagDataskp, 'altura', None), # REVISAR para agregar en la trama
+
+
+    #                "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
+    #                "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
+    #                "date"  : (13, None, tagDataskp, 'date', skpDate), # Fecha 
+    #                "odometer"  : (15, None, tagDataskp, 'odometer', mTokm) # Odómetro
+                 }
+
+    def __parse(self, data):
+        self.clear()
+        try:
+            import re
+            
+            data = re.sub(r"[:;]", ",", data)
+            dataList = data.split(',')[:-1]
+            print dataList #(Print de Prueba)
+            
+            for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataTK.items():
+                self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
+
+            print "-" * 20
+            print self
+            raise SystemExit
+            
+            # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
+            #self['altura'] = None
+            # Creamos una key para el dato position:
+            self['position'] = "(%(lat)s,%(lng)s)" % self
+
+            # Fecha y Hora del dispositivo:
+            #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
+            self["datetime"] = fechaHoraSkp(self["date"], self["time"])
+
+            # Realizamos la Geocodificación. Tratar de no hacer esto
+            # es mejor que se realize por cada cliente con la API de GoogleMap
+            self["geocoding"] = None
+            #self["geocoding"] = json.loads(Location.geomapgoogle.regeocode('%s,%s' % (self["lat"], self["lng"])))[0]
+            #self["geocoding"] = Location.geocoding.regeocodeOSM('%s,%s' % (self["lat"], self["lng"])) # Dejo de funcionar el 16-09-2015
+            #self["geocoding"] = Location.geocoding.regeocodeGMap('%s,%s' % (self["lat"], self["lng"])) # Dejo de funcionar el 17-09-2015
+            # Nominatim:
+            #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
+            self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
+            #print "-" * 20
+            #print self
+            #raise SystemExit
+        except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
+        #finally: dataFile.close()
+
+    def __setitem__(self, key, item):
+        if key == "data" and item:
+            self.__parse(item)
+        # Llamamos a __setitem__ de nuestro ancestro
+        Device.__setitem__(self, key, item)
+
+
 def typeDevice(data):
     """
         Determina que tipo de Dispositivo GPS es dueña de la data.
@@ -447,7 +535,7 @@ def typeDevice(data):
             >>> 
     """
     # Dispositivos soportados:
-    types = ('ANT', 'SKP', 'TT', 'GV')
+    types = ('ANT', 'SKP', 'TT', 'GV', 'imei')
 
     typeDev = lambda dat: ("".join(
                             [d for d in types
@@ -504,6 +592,7 @@ def getTypeClass(data, address=None, module=sys.modules[Device.__module__]):
     #print "-"*80
     #print "Devices: ", dev
     #print "-"*80
+    #raise SystemExit(0)
 
     #return dev
     def getClass(module, dev):
