@@ -17,6 +17,7 @@ import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
 from Gps.Queclink import convert
+from Gps.Coban.covert import code_event
 
 
 def tagData(dFile, position, bit=None, seek=0):
@@ -448,7 +449,7 @@ class imeiDevice(Device):
 
     #                "ignition"  : (15, None, tagDataskp, 'ignition', None), # REVISAR para agregar en la trama 
 
-    #                "codEvent"  : (1, None, tagDataskp, 'codEvent', None), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
+                    "codEvent"  : (2, None, tagDataskp, 'codEvent', code_event), # Codigo de evento activado (en Antares de 00 a 49, en e.Track de 00 a 99)
     #                "weeks"     : (0, None, tagDataskp, 'weeks', None), # Es el numero de semanas desde 00:00AM del 6 de enero de 1980.
     #                "dayWeek"   : (0, None, tagDataskp, 'dayWeek', None), # 0=Domingo, 1=Lunes, etc hasta 6=sabado.
     #                "time"      : (5, None, tagDataskp, 'time', skpTime), # Hora expresada en segundos desde 00:00:00AM
@@ -478,14 +479,15 @@ class imeiDevice(Device):
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataTK.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
 
-            print "-" * 20
-            print self
-            raise SystemExit
             
             # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
             #self['altura'] = None
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
+
+            print "-" * 20
+            print self
+            raise SystemExit
 
             # Fecha y Hora del dispositivo:
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
