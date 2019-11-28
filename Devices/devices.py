@@ -17,7 +17,7 @@ import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
 from Gps.Queclink import convert
-from Gps.Coban.covert import code_event
+from Gps.Coban.covert import code_event, tk_date, tk_time, tk_datetime
 
 
 def tagData(dFile, position, bit=None, seek=0):
@@ -204,7 +204,7 @@ class SKPDevice(Device):
 
             print "-" * 20
             print self
-            raise SystemExit(1)
+            #raise SystemExit(1)
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
             self["geocoding"] = None
@@ -460,10 +460,11 @@ class imeiDevice(Device):
                     "course"    : (13, None, tagDataskp, 'course', None), # Curso en grados - REVISAR
     #                "altura"    : (14, None, tagDataskp, 'altura', None), # REVISAR para agregar en la trama
 
-
     #                "gpsSource" : (0, None, tagDataskp, 'gpsSource', None), # Fuente GPS. Puede ser 0=2D GPS, 1=3D GPS, 2=2D DGPS, 3=3D DGPS, 6=DR, 8=Degraded DR. # Problema DB si no son enteros    
     #                "ageData"   : (0, None, tagDataskp, 'ageData', None), # Edad del dato. Puede ser 0=No disponible, 1=viejo (10 segundos) ó 2=Fresco (menor a 10 segundos) # Problema DB si no son enteros
     #                "date"  : (13, None, tagDataskp, 'date', skpDate), # Fecha 
+                    "date"  : (3, None, tagDataskp, 'date', tk_date), # datetime
+                    "time"  : (6, None, tagDataskp, 'time', tk_time), # zero_time_zone
     #                "odometer"  : (15, None, tagDataskp, 'odometer', mTokm) # Odómetro
                  }
 
@@ -474,24 +475,24 @@ class imeiDevice(Device):
             
             data = re.sub(r"[:;]", ",", data)
             dataList = data.split(',')[:-1]
-            print dataList #(Print de Prueba)
+            #print dataList #(Print de Prueba)
             
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataTK.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
 
-            
             # Creamos una key para la altura (estandar), ya que las tramas actuales no la incluyen:
             #self['altura'] = None
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
 
-            print "-" * 20
-            print self
-            raise SystemExit
-
             # Fecha y Hora del dispositivo:
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
+            #self['datetime'] = tk_datetime(self['date'], self['time']) 
+
+            print "-" * 20
+            print self
+            raise SystemExit(0)
 
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
