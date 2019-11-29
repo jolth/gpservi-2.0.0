@@ -484,16 +484,18 @@ class imeiDevice(Device):
             #self['altura'] = None
             # Creamos una key para el dato position:
             self['position'] = "(%(lat)s,%(lng)s)" % self
+            self['altura'] = None
+            self['gpsSource'] = None
+            self['ageData'] = None
+            self['odometer'] = None
 
             # Fecha y Hora del dispositivo:
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
             self["datetime"] = fechaHoraSkp(self["date"], self["time"])
             #self['datetime'] = tk_datetime(self['date'], self['time']) 
-
-            print "-" * 20
-            print self
-            raise SystemExit(0)
-
+            #print "-" * 20
+            #print self
+            #raise SystemExit(0)
             # Realizamos la Geocodificación. Tratar de no hacer esto
             # es mejor que se realize por cada cliente con la API de GoogleMap
             self["geocoding"] = None
@@ -503,9 +505,9 @@ class imeiDevice(Device):
             # Nominatim:
             #self["geocoding"] = Location.nominatim.Openstreetmap((self["lat"], self["lng"]))
             self["geocoding"] = Location.nominatim.Openstreetmap(self["lat"], self["lng"]).decodeJSON()
-            #print "-" * 20
-            #print self
-            #raise SystemExit
+            print "-" * 20
+            print self
+            raise SystemExit
         except Exception: print(sys.exc_info()) #sys.stderr.write('Error Inesperado:', sys.exc_info())
         #finally: dataFile.close()
 
