@@ -17,7 +17,7 @@ import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
 from Gps.Queclink import convert
-from Gps.Coban.covert import code_event, tk_date, tk_time, tk_datetime
+from Gps.Coban.convert import code_event, tk_date, tk_time, tk_datetime
 
 
 def tagData(dFile, position, bit=None, seek=0):
