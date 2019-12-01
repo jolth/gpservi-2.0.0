@@ -17,7 +17,7 @@ import Location.geomapgoogle
 import Location.geocoding
 import Location.nominatim
 from Gps.Queclink import convert
-from Gps.Coban.convert import code_event, tk_date, tk_time, tk_datetime
+from Gps.Coban.convert import code_event, tk_date, tk_time, tk_datetime, tk_speed
 
 
 def tagData(dFile, position, bit=None, seek=0):
@@ -450,7 +450,7 @@ class imeiDevice(Device):
                     "lat"       : (8, 9, tagDataskp, 'lat', degTodms), # Latitud
                     "lng"       : (10, 11, tagDataskp, 'lng', degTodms), # Longitud
 
-                    "speed"     : (12, None, tagDataskp, 'speed', None), # REVISAR que si concuerde  
+                    "speed"     : (12, None, tagDataskp, 'speed', tk_speed), # REVISAR que si concuerde
                     "course"    : (13, None, tagDataskp, 'course', None), # Curso en grados - REVISAR
     #                "altura"    : (14, None, tagDataskp, 'altura', None), # REVISAR para agregar en la trama
 

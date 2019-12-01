@@ -26,3 +26,6 @@ def tk_time(zero_time_zone):
 
 def tk_datetime(date, time): 
     return datetime.datetime.combine(date, time)
+
+def tk_speed(speed):
+    return speed or '0.0'
