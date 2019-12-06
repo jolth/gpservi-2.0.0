@@ -28,4 +28,9 @@ def tk_datetime(date, time):
     return datetime.datetime.combine(date, time)
 
 def tk_speed(speed):
+    if speed:
+        if speed > 1:
+            return '{:.1f}'.format(float(speed) * 1.609344);
+        else:
+            return '0.0'
     return speed or '0.0'
