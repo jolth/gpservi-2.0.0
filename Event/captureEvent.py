@@ -119,7 +119,7 @@ def event1(data=None):
     #print >> sys.stdout, "ID Vehiculo" + data['id']#(Print de Prueba)
 
     query = """SELECT c.id AS cliente_id, v.placa, p.phone, tp.name,
-    c.nombre1, c.nombre2, c.apellido1, c.apellido2
+    c.nombre1, c.nombre2, c.apellido1, c.apellido2, v.active
     FROM vehiculos v
     JOIN gps AS g ON (g.id=v.gps_id)
     JOIN clientes_vehiculos AS cv ON (cv.vehiculo_id=v.id)
@@ -133,7 +133,7 @@ def event1(data=None):
         from DB.pgSQL import PgSQL
         db = PgSQL()
         db.cur.execute(query, data)
-        msg = u"Evento de PANICO\n"
+        msg = u"Evento: PANICO\n"
         for i in db.cur.fetchall():
             # [(1, 'rjm270', 'jorge', 'alonso', 'toro', 'hoyos', '3202433506', 'celular')]
             veh, tel, tipo = (i[1].upper(), i[2], i[3])
@@ -148,16 +148,20 @@ def event1(data=None):
             #nom = nom.encode('utf-8')
             nom = unicode(nom, 'utf-8')
             #print >> sys.stderr, "EL NOMEBRE: " + nom
+            active = i[8]
             msg += u"""
-            Vehiculo: %s
+            Vehiculo: %s 
+            Active: %s
             Cliente: %s
             %s: %s
-            """ % (veh, nom, tipo, tel)
+            """ % (veh, active, nom, tipo, tel)
         msg += u"""
         Fecha: %s
         """ % (data['datetime'].strftime("%F %H:%M:%S"))
         msg += u"""
         Ubicación: %(geocoding)s
+
+        https://maps.google.com/maps?f=q&q=%(lat)s,%(lng)s&z=16
 
         <http://maps.google.com/maps?q=%(lat)s,%(lng)s>
 
@@ -170,8 +174,8 @@ def event1(data=None):
         # receptores del mensaje
         #receivers = {'Soporte':'soporte@devmicrosystem.com', 'Diana Duque':'diana.duque@devmicrosystem.com', 'Demouser':'demouser@rastree.com'}
         receivers = {'Eventos': 'eventos'}
-        #print "MENSAJE:", msg
-        subject = u"Mensaje de Panicon(%s) Vehículo %s" % (data['id'], veh)
+        print "MENSAJE:", msg.encode('utf-8')
+        subject = u"Mensaje de Pánico(%s) Vehículo %s" % (data['id'], veh)
         #print "SUBJECT", subject
         #SMail.smail.sendMail(receivers, subject, msg)
         msg = msg.encode('utf-8')
