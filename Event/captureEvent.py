@@ -174,7 +174,7 @@ def event1(data=None):
         # receptores del mensaje
         #receivers = {'Soporte':'soporte@devmicrosystem.com', 'Diana Duque':'diana.duque@devmicrosystem.com', 'Demouser':'demouser@rastree.com'}
         receivers = {'Eventos': 'eventos'}
-        print "MENSAJE:", msg.encode('utf-8')
+        #print "MENSAJE:", msg.encode('utf-8')
         subject = u"Mensaje de Pánico(%s) Vehículo %s" % (data['id'], veh)
         #print "SUBJECT", subject
         #SMail.smail.sendMail(receivers, subject, msg)
