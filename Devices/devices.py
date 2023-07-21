@@ -435,6 +435,9 @@ class imeiDevice(Device):
     """
     # ['imei', '864180038790106', 'tracker', '191120155455', '', 'F', '205455.00', 'A', '0502.30489', 'N', '07527.55108', 'W', '0.000', '0', '']
     # [     0,                 1,         2,              3,  4,   5,           6,   7,            8,   9,            10,  11,      12,  13, 14]
+    ## protocol 18:
+    # ['imei', '868166052272770', 'tracker', '230721155900', '', 'F', '155900.000', 'A', '0502.30245', 'N', '07527.54983', 'W', '0.00', '348.94', '', '1', '0', '0.00%', '', '']
+    # [     0,                 1,         2,              3,  4,   5,            6,   7,            8,   9,            10,  11,     12,       13, 14,  15,  16,      17, 18, 19]
     tagDataTK = {
     #               "key"       : (position_start, position_end, function_tagData, nameTag, function_convert)
                     "id"        : (1, None, tagDataskp, 'id', None), # ID de la unidad
@@ -470,7 +473,7 @@ class imeiDevice(Device):
             data = re.sub(r"[:;]", ",", data)
             dataList = data.split(',')[:-1]
             #print dataList #(Print de Prueba)
-            
+
             for tag, (position_start, position_end, parseFunc, nameTag, convertFunc) in self.tagDataTK.items():
                 self[tag] = convertFunc and convertFunc(parseFunc(dataList, position_start, position_end, nameTag)) or parseFunc(dataList, position_start, position_end, nameTag)
 
@@ -482,6 +485,11 @@ class imeiDevice(Device):
             self['gpsSource'] = None
             self['ageData'] = None
             self['odometer'] = None
+            if len(dataList) > 14:
+                #print "ING: ", dataList[15]
+                #ign = int(dataList[15])
+                self['ignition'] = 't' if int(dataList[15]) == 1 else 'f'
+                #print "IGN:", self['ignition']
 
             # Fecha y Hora del dispositivo:
             #self["fechahora"] = fechaHoraSkp(self["date"], self["time"]) 
